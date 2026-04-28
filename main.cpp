@@ -36,7 +36,7 @@ struct SteamControllerInfos{
 	libusb_device_handle* dev_handle;
 	int interfaceNum;
 
-	bool isDeck = false;
+	bool isNew;
 	signed char leftGain;
 	signed char rightGain;
 };
@@ -49,22 +49,30 @@ bool SteamController_Open(SteamControllerInfos* controller){
 
 	libusb_device_handle* dev_handle;
 	//Open Steam Controller device
-	if((dev_handle = libusb_open_device_with_vid_pid(NULL, 0x28DE, 0x1102)) != NULL){ // Wired Steam Controller
-		cout<<"Found wired Steam Controller"<<endl;
+	if((dev_handle = libusb_open_device_with_vid_pid(NULL, 0x28DE, 0x1102)) != NULL){ // Wired Steam Controller (2015)
+		cout<<"Found wired Steam Controller (2015)"<<endl;
 		controller->dev_handle = dev_handle;
 		controller->interfaceNum = 2;
+		controller->isNew = false;
 	}
-	else if((dev_handle = libusb_open_device_with_vid_pid(NULL, 0x28DE, 0x1142)) != NULL){ // Steam Controller dongle
-		cout<<"Found Steam Dongle, will attempt to use the first Steam Controller"<<endl;
+	else if((dev_handle = libusb_open_device_with_vid_pid(NULL, 0x28DE, 0x1142)) != NULL){ // Steam Controller (2015) dongle //TODO: FIX
+		cout<<"Found Steam Dongle, will attempt to use the first Steam Controller (2015)"<<endl;
 		controller->dev_handle = dev_handle;
 		controller->interfaceNum = 1;
+		controller->isNew = false;
 	} 
 	else if((dev_handle = libusb_open_device_with_vid_pid(NULL, 0x28DE, 0x1205)) != NULL){ // Steam Deck
 		cout<<"Found Steam Deck"<<endl;
 		controller->dev_handle = dev_handle;
 		controller->interfaceNum = 2;
-		controller->isDeck = true;
+		controller->isNew = true;
 	}
+	// else if((dev_handle = libusb_open_device_with_vid_pid(NULL, 0x28DE, 0x0000)) != NULL){ // Steam Controller (2026)
+	// 	cout<<"Found wired Steam Controller (2026)"<<endl;
+	// 	controller->dev_handle = dev_handle;
+	// 	controller->interfaceNum = 2;
+	// 	controller->isNew = true;
+	// }
 	else{
 		cout<<"No device found"<<endl;
 		return false;
@@ -121,7 +129,8 @@ int SteamHaptics_PlayNote(SteamControllerInfos* controller, int haptic, int note
 	double frequency = midiFrequency[note];
 	uint16_t duration = (note == NOTE_STOP) ? 0x0000 : 0x7fff;
 
-	if(controller->isDeck) {
+	if(controller->isNew) {
+		//New Haptic Playback
 		dataBlob[0] = 0xEA;
 		dataBlob[2] = !haptic;
 		dataBlob[6] = (int)frequency % 0xFF;
@@ -129,6 +138,7 @@ int SteamHaptics_PlayNote(SteamControllerInfos* controller, int haptic, int note
 		dataBlob[8] = duration % 0xFF;
 		dataBlob[9] = duration / 0xFF;
 	} else {
+		//Legacy Haptic Playback
 		double period = 1.0 / frequency;
 		uint16_t periodCommand = period * STEAM_CONTROLLER_MAGIC_PERIOD_RATIO; //Reminder to check if the Steam Controller tuning lines up with the Deck.
 		uint16_t repeatCommand = (note == NOTE_STOP) ? 0x0000 : 0x7fff;
