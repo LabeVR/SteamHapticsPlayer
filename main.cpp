@@ -132,7 +132,7 @@ int SteamHaptics_PlayNote(SteamControllerInfos* controller, int haptic, int note
 	double frequency = midiFrequency[note];
 	uint16_t duration = (note == NOTE_STOP) ? 0x0000 : 0x7fff;
 
-	if(!legacyInst or controller->isNew) {
+	if(!legacyInst && controller->isNew) {
 		//New Haptic Playback
 		dataBlob[0] = 0xEA;
 		dataBlob[2] = !haptic;
@@ -304,7 +304,7 @@ void playSong(SteamControllerInfos* controller,const ParamsStruct params){
 
 bool parseArguments(int argc, char** argv, ParamsStruct* params){
 	int c;
-	while ( (c = getopt(argc, argv, "k:j:c:l:i:r")) != -1) {
+	while ( (c = getopt(argc, argv, "d:i:p:y")) != -1) {
 		unsigned long int value;
 		switch(c){
 		/*case 'l':
@@ -331,11 +331,11 @@ bool parseArguments(int argc, char** argv, ParamsStruct* params){
 				params->intervalUSec = value;
 			}
 			break;
-		case 'y':
-			legacyInst = true;
-			break;
 		case 'p':
 			params->repeatSong = true;
+			break;
+		case 'y':
+			legacyInst = true;
 			break;
 		case '?':
 			return false;
