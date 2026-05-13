@@ -145,7 +145,9 @@ int SteamHaptics_PlayNote(SteamControllerInfos* controller, int haptic, int note
 		dataBlob[6] = periodCommand / 0xFF;
 		dataBlob[7] = repeatCommand % 0xFF;
 		dataBlob[8] = repeatCommand / 0xFF;
-		r = libusb_control_transfer(controller->dev_handle,0x21,9,0x0300,2,dataBlob,64,1000);
+		dataBlob[9] = 0x7F;
+		dataBlob[10]= 0xFF;
+		r = libusb_control_transfer(controller->dev_handle,0x21,9,0x0300,2,dataBlob,16,1000);
 		if(r < 0) {
 			cout<<"Command Error "<<r<< endl;
 			exit(0);
@@ -156,7 +158,7 @@ int SteamHaptics_PlayNote(SteamControllerInfos* controller, int haptic, int note
 
 		dataBlob[0] = 0x83;
 		dataBlob[1] = haptic;
-		dataBlob[2] = 0xFF;
+		dataBlob[2] = 0xFE;
 		dataBlob[3] = (int)frequency % 0xFF;
 		dataBlob[4] = (int)frequency / 0xFF;
 		r = libusb_interrupt_transfer(controller->dev_handle,0x01,dataBlob,16,NULL,1000);
@@ -170,16 +172,19 @@ int SteamHaptics_PlayNote(SteamControllerInfos* controller, int haptic, int note
 	
 		dataBlob[0] = 0xEA;
 		dataBlob[2] = !haptic;
+		dataBlob[3] = 0x03;
+		dataBlob[5] = 0x7F;
 		dataBlob[6] = (int)frequency % 0xFF;
 		dataBlob[7] = (int)frequency / 0xFF;
 		dataBlob[8] = duration % 0xFF;
 		dataBlob[9] = duration / 0xFF;
-		r = libusb_control_transfer(controller->dev_handle,0x21,9,0x0300,2,dataBlob,64,1000);
+		r = libusb_control_transfer(controller->dev_handle,0x21,9,0x0300,2,dataBlob,16,1000);
 		if(r < 0) {
 			cout<<"Command Error "<<r<< endl;
 			exit(0);
 		}
 		break;
+	
 	}
 
 	return 0;
@@ -323,7 +328,7 @@ void playSong(SteamControllerInfos* controller,const ParamsStruct params){
 
 bool parseArguments(int argc, char** argv, ParamsStruct* params){
 	int c;
-	while ( (c = getopt(argc, argv, "d:i:p:y")) != -1) {
+	while ( (c = getopt(argc, argv, "d:i:p")) != -1) {
 		unsigned long int value;
 		switch(c){
 		/*case 'l':
@@ -353,9 +358,9 @@ bool parseArguments(int argc, char** argv, ParamsStruct* params){
 		case 'p':
 			params->repeatSong = true;
 			break;
-		case 'y':
-			legacyInst = true;
-			break;
+		// case 'y':
+		// 	legacyInst = true;
+		// 	break;
 		case '?':
 			return false;
 			break;
