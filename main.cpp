@@ -154,8 +154,8 @@ int SteamHaptics_PlayNote(SteamControllerInfos* controller, int haptic, int note
 		dataBlob[6] = periodCommand / 0xFF;
 		dataBlob[7] = repeatCommand % 0xFF;
 		dataBlob[8] = repeatCommand / 0xFF;
-		dataBlob[9] = 0x7F;
-		dataBlob[10]= 0xFF;
+		dataBlob[9] = 0x00;
+		dataBlob[10]= 0x00;
 		r = libusb_control_transfer(controller->dev_handle,0x21,9,0x0300,controller->interfaceNum,dataBlob,16,1000);
 		if(r < 0) {
 			cout<<"Command Error "<<r<< endl;
@@ -182,7 +182,7 @@ int SteamHaptics_PlayNote(SteamControllerInfos* controller, int haptic, int note
 		dataBlob[0] = 0xEA;
 		dataBlob[2] = !haptic; //Swap haptics to match 2015
 		dataBlob[3] = 0x03; 
-		dataBlob[5] = 0x7F;
+		dataBlob[5] = 0x00;
 		dataBlob[6] = (int)frequency % 0xFF;
 		dataBlob[7] = (int)frequency / 0xFF;
 		dataBlob[8] = duration % 0xFF;
