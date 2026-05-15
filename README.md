@@ -22,7 +22,7 @@ Songs ready to play can be found in the original guy's [personal collection](htt
 	  -e 	Direct velocity to gain control, the MIDI file will set the gain"
 	  -t	(Steam Controller 2026 Only) Only use trackpads
 	  -b	(Steam Controller 2026 Only) Map first two channels to rumble instead of trackpads
-		-s	(Steam Controller 2026 Only) Swap channel mapping between haptics and rumble
+	  -s	(Steam Controller 2026 Only) Swap channel mapping between haptics and rumble
 
 ### MIDI files tips:
 
