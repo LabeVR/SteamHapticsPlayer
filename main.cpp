@@ -38,6 +38,7 @@ bool legacyInst = false;
 bool directVel = false;
 bool tritonTrackpad = false;
 bool tritonRumble = false;
+bool tritonSwap = false;
 int channelCount = 2;
 
 enum class ControllerType {
@@ -270,7 +271,7 @@ void playSong(SteamControllerInfos* controller,const ParamsStruct params){
 	MidiFile_t midifile;
 
 	//Open Midi File
-	midifile = MidiFile_load(params.midiSong);
+	midifile = MidiFile_load((char*)params.midiSong);
 
 	if(midifile == NULL){
 		cout << "Unable to open MIDI file!" << params.midiSong << endl;
@@ -342,7 +343,8 @@ void playSong(SteamControllerInfos* controller,const ParamsStruct params){
 		//Now play the last events found
 		for(int currentChannel = 0 ; currentChannel < channelCount ; currentChannel++){
 			MidiFileEvent_t selectedEvent = eventsToPlay[currentChannel];
-
+			int channelToPlay = currentChannel;
+			if (tritonSwap && channelCount == 4) channelToPlay = currentChannel ^ 2;
 			//If no note event available on the channel, skip it
 			if(!MidiFileEvent_isNoteStartEvent(selectedEvent) && !MidiFileEvent_isNoteEndEvent(selectedEvent)) continue;
 
@@ -351,15 +353,15 @@ void playSong(SteamControllerInfos* controller,const ParamsStruct params){
 			int8_t eventVel  = 0;
 			if(MidiFileEvent_isNoteStartEvent(selectedEvent)){
 				//Send note stop before playing to prevent Steam Controller (2026) rebooting when using motors
-				SteamHaptics_PlayNote(controller,currentChannel,NOTE_STOP,0);
+				SteamHaptics_PlayNote(controller,channelToPlay,NOTE_STOP,0);
 				eventNote = MidiFileNoteStartEvent_getNote(selectedEvent);
 				eventVel  = MidiFileNoteStartEvent_getVelocity(selectedEvent);
 			}
 
 			//Play notes
-			SteamHaptics_PlayNote(controller,currentChannel,eventNote,eventVel);
+			SteamHaptics_PlayNote(controller,channelToPlay,eventNote,eventVel);
 
-			displayPlayedNotes(currentChannel,eventNote);
+			displayPlayedNotes(channelToPlay,eventNote);
 		}
 	}
 
@@ -372,7 +374,7 @@ void playSong(SteamControllerInfos* controller,const ParamsStruct params){
 
 bool parseArguments(int argc, char** argv, ParamsStruct* params){
 	int c;
-	while ( (c = getopt(argc, argv, "di:petb")) != -1) {
+	while ( (c = getopt(argc, argv, "di:petbs")) != -1) {
 		unsigned long int value;
 		switch(c){
 		/*case 'l':
@@ -412,6 +414,9 @@ bool parseArguments(int argc, char** argv, ParamsStruct* params){
 		case 'b':
 			tritonRumble = true;
 			channelCount = 2;
+			break;
+		case 's':
+			tritonSwap = true;
 			break;
 		// case 'y':
 		// 	legacyInst = true;
@@ -467,6 +472,7 @@ int main(int argc, char** argv)
 			  "\n  -e 	Direct velocity to gain control, the MIDI file will set the gain"
 			  "\n  -t	(Steam Controller 2026 Only) Only use trackpads"
 			  "\n  -b	(Steam Controller 2026 Only) Map first two channels to rumble instead of trackpads"
+				"\n  -s	(Steam Controller 2026 Only) Swap channel mapping between haptics and rumble"
 				"" << endl;
 		return 1;
 	}
