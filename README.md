@@ -19,7 +19,9 @@ Songs ready to play can be found in the original guy's [personal collection](htt
 	  -i INTERVAL		Player sleep interval (in microseconds). Lower generally means better song fidelity, but higher cpu usage, and at some point going lower won't improve any more. Default value is 10000
 	  -d DEBUG_LEVEL	Libusb debug level. Default is 0, no debug output. max is 4, max verbosity output
 	  -p	Repeat song, plays again after ending
-	  -y	Legacy playback, forces usage of the old Steam Controller haptic instruction instead of the new one (causes issues)
+	  -e 	Direct velocity to gain control, the MIDI file will set the gain"
+	  -t	(Steam Controller 2026 Only) Only use trackpads
+	  -b	(Steam Controller 2026 Only) Map first two channels to rumble instead of trackpads
 
 ### MIDI files tips:
 
@@ -27,6 +29,8 @@ MIDI files may need to be edited with a software such as [MidiEditor](https://ww
 
 * Notes from MIDI channel 0 are played on right haptic
 * Notes from MIDI channel 1 are played on left haptic
+* Notes from MIDI channel 2 are played on right rumble (Steam Controller 2026 only)
+* Notes from MIDI channel 3 are played on left rumble (Steam Controller 2026 only)
 * Notes from others channels are ignored
 * **Avoid multiple notes active at the same time on the same channel**, since haptic actuators can only play one note at the time.
 
