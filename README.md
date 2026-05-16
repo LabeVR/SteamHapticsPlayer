@@ -2,7 +2,7 @@
 
 This project aims to be a continuation of SteamControllerSinger (forked from [Roboron3042's fork](https://github.com/Roboron3042/SteamControllerSinger), originally by [Pila](https://gitlab.com/Pilatomic/SteamControllerSinger)) by fixing issues, adding features, and, most notably, Steam Deck and Steam Controller (2026) support.
 
-I have made a small Discord server for sharing MIDI files and updates easier for anyone interested: https://discord.gg/TWpvAxX5GW
+I have made a small [Discord server](https://discord.gg/TWpvAxX5GW) for sharing MIDI files and updates easier for anyone interested.
 
 ## How To
 
