@@ -39,22 +39,12 @@ MIDI files may need to be edited with a software such as [MidiEditor](https://ww
 
 ## Compiling
 
-You will need libusb(-dev) and pkgconf. If you have them, just type `make`.
-
-It's recommended to build this in a container such as [steam-runtime](https://github.com/ValveSoftware/steam-runtime?tab=readme-ov-file#building-in-the-runtime) or [holo-docker](https://github.com/SteamDeckHomebrew/holo-docker) in order for the packges to line up with the Steam Deck.
-
-If you go the steam-runtime route, make sure to use sniper as scout is outdated.
-
-### For a guide:
-	git clone -b master https://github.com/CrazyCritic89/SteamHapticsSinger.git
-	cd SteamHapticsSinger
-	podman run --rm -v ./:/src -it registry.gitlab.steamos.cloud/steamrt/sniper/sdk bash
-	cd src
-	make
-	exit
-
+You will need libusb(-dev), hidapi-hidraw, and pkgconf. If you have them, just type `make`.
 
 ## Changelog
+
+[v1.11.2]
+* Steam Controller (2026) is now handled by HIDAPI
 
 [v1.11.1]
 * Steam Controller (2026) now defaults to using rumble for the first two channels
