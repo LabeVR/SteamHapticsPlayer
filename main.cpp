@@ -1,5 +1,6 @@
 #include <iostream>
 #include <chrono>
+#include <cstring>
 
 #include <stdint-gcc.h>
 #include <unistd.h>
@@ -286,8 +287,7 @@ void playSong(SteamControllerInfos* controller,const ParamsStruct params){
 		return;
 	}
 	
-	string_view sv(params.midiSong);
-	if (sv.find("dv") != std::string::npos) {
+	if (strstr(params.midiSong,"dv")) {
         std::cout << "Found \"dv\" in file name, assuming direct velocity to gain control" << std::endl;
 		directVel = true;
     }
