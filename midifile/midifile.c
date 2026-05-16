@@ -2970,6 +2970,7 @@ MidiFileEvent_t MidiFileTrack_createSysexEvent(MidiFileTrack_t track, long tick,
 	new_event->type = MIDI_FILE_EVENT_TYPE_SYSEX;
 	new_event->u.sysex.data_length = data_length;
 	new_event->u.sysex.data_buffer = malloc(data_length);
+	if (new_event->u.sysex.data_buffer == NULL) { free(new_event); return NULL; }
 	memcpy(new_event->u.sysex.data_buffer, data_buffer, data_length);
 	new_event->should_be_visited = 0;
 	new_event->is_selected = 0;
@@ -2991,6 +2992,7 @@ MidiFileEvent_t MidiFileTrack_createMetaEvent(MidiFileTrack_t track, long tick, 
 	new_event->u.meta.number = number;
 	new_event->u.meta.data_length = data_length;
 	new_event->u.meta.data_buffer = malloc(data_length + 1);
+	if (new_event->u.meta.data_buffer == NULL) { free(new_event); return NULL; }
 	memcpy(new_event->u.meta.data_buffer, data_buffer, data_length);
 	new_event->u.meta.data_buffer[data_length] = '\0';
 	new_event->should_be_visited = 0;
@@ -5086,7 +5088,7 @@ int MidiFileMeasureBeat_setBeat(MidiFileMeasureBeat_t measure_beat, float beat)
 char *MidiFileMeasureBeat_toString(MidiFileMeasureBeat_t measure_beat)
 {
 	if (measure_beat == NULL) return NULL;
-	sprintf(measure_beat->string, "%ld:%.3f", measure_beat->measure, measure_beat->beat);
+	snprintf(measure_beat->string, sizeof(measure_beat->string), "%ld:%.3f", measure_beat->measure, measure_beat->beat);
 	return measure_beat->string;
 }
 
@@ -5158,7 +5160,7 @@ int MidiFileMeasureBeatTick_setTick(MidiFileMeasureBeatTick_t measure_beat_tick,
 char *MidiFileMeasureBeatTick_toString(MidiFileMeasureBeatTick_t measure_beat_tick)
 {
 	if (measure_beat_tick == NULL) return NULL;
-	sprintf(measure_beat_tick->string, "%ld:%ld:%.3f", measure_beat_tick->measure, measure_beat_tick->beat, measure_beat_tick->tick);
+	snprintf(measure_beat_tick->string, sizeof(measure_beat_tick->string), "%ld:%ld:%.3f", measure_beat_tick->measure, measure_beat_tick->beat, measure_beat_tick->tick);
 	return measure_beat_tick->string;
 }
 
@@ -5231,7 +5233,7 @@ int MidiFileHourMinuteSecond_setSecond(MidiFileHourMinuteSecond_t hour_minute_se
 char *MidiFileHourMinuteSecond_toString(MidiFileHourMinuteSecond_t hour_minute_second)
 {
 	if (hour_minute_second == NULL) return NULL;
-	sprintf(hour_minute_second->string, "%ld:%02ld:%06.3f", hour_minute_second->hour, hour_minute_second->minute, hour_minute_second->second);
+	snprintf(hour_minute_second->string, sizeof(hour_minute_second->string), "%ld:%02ld:%06.3f", hour_minute_second->hour, hour_minute_second->minute, hour_minute_second->second);
 	return hour_minute_second->string;
 }
 
@@ -5318,7 +5320,7 @@ int MidiFileHourMinuteSecondFrame_setFrame(MidiFileHourMinuteSecondFrame_t hour_
 char *MidiFileHourMinuteSecondFrame_toString(MidiFileHourMinuteSecondFrame_t hour_minute_second_frame)
 {
 	if (hour_minute_second_frame == NULL) return NULL;
-	sprintf(hour_minute_second_frame->string, "%ld:%02ld:%02ld:%.3f", hour_minute_second_frame->hour, hour_minute_second_frame->minute, hour_minute_second_frame->second, hour_minute_second_frame->frame);
+	snprintf(hour_minute_second_frame->string, sizeof(hour_minute_second_frame->string), "%ld:%02ld:%02ld:%.3f", hour_minute_second_frame->hour, hour_minute_second_frame->minute, hour_minute_second_frame->second, hour_minute_second_frame->frame);
 	return hour_minute_second_frame->string;
 }
 
