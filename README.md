@@ -6,9 +6,18 @@ I have made a small [Discord server](https://discord.gg/TWpvAxX5GW) for sharing 
 
 ## How To
 
-1. Turn on your Steam Controller (2015 or 2026) or Steam Deck
-2. Drag the MIDI file onto the steam-haptics-singer executable
-3. If prompted, press Enter
+Turn on your Steam Controller (2015 or 2026) or Steam Deck
+
+#### On Linux
+1. Right click inside the folder
+2. Click "Open in Terminal" 
+3. Type `chmod +x steam-haptics-singer` to make the program executable
+4. Type `./steam-haptics-singer [name of your midi file]` to run
+5. Enjoy!
+#### On Windows
+1. Click the open space in the folder path at the top in file explorer
+2. Type in "cmd"
+3. Type `steam-haptics-singer.exe [name of your midi file]` to run
 4. Enjoy!
 
 ### Where can I find midi songs?
@@ -42,9 +51,6 @@ MIDI files may need to be edited with a software such as [MidiEditor](https://ww
 You will need libusb(-dev), hidapi-hidraw, and pkgconf. If you have them, just type `make`.
 
 ## Changelog
-
-[v1.11.2]
-* Steam Controller (2026) is now handled by HIDAPI
 
 [v1.11.1]
 * Steam Controller (2026) now defaults to using rumble for the first two channels
