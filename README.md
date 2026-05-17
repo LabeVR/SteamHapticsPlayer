@@ -14,7 +14,7 @@ This project aims to be a continuation of SteamControllerSinger (forked from [Ro
 Songs ready to play can be found in the original guy's [personal collection](https://mega.nz/#F!BWpEWKzB!r7WPw5bZ_domN4pk-FJsjg) (as he called it). Otherwise, you can just try a MIDI and see what happens (most of the time it won't work well).
 
 ### Usage from command prompt:
-	Usage: steam-haptics-singer [-p] [-y] [-d DEBUG_LEVEL] [-i INTERVAL] MIDI_FILE
+	Usage: steam-haptics-singer [-p] [-y] [-d DEBUG_LEVEL] [-i INTERVAL] [-a] INPUT_FILE
 
 	  -i INTERVAL		Player sleep interval (in microseconds). Lower generally means better song fidelity, but higher cpu usage, and at some point going lower won't improve any more. Default value is 10000
 	  -d DEBUG_LEVEL	Libusb debug level. Default is 0, no debug output. max is 4, max verbosity output
@@ -23,6 +23,7 @@ Songs ready to play can be found in the original guy's [personal collection](htt
 	  -t	(Steam Controller 2026 Only) Only use trackpads
 	  -b	(Steam Controller 2026 Only) Map first two channels to rumble instead of trackpads
 	  -s	(Steam Controller 2026 Only) Swap channel mapping between haptics and rumble
+	  -a	Use audio mode (requires ffmpeg in PATH). Non-.mid inputs auto-select audio mode
 
 ### MIDI files tips:
 
