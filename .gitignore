@@ -1,2 +1,7 @@
 steam-haptics-singer 
 *.mid
+*.midi
+SC_Singer
+*.opus
+*.wav
+*.exe
