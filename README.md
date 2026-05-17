@@ -2,11 +2,22 @@
 
 This project aims to be a continuation of SteamControllerSinger (forked from [Roboron3042's fork](https://github.com/Roboron3042/SteamControllerSinger), originally by [Pila](https://gitlab.com/Pilatomic/SteamControllerSinger)) by fixing issues, adding features, and, most notably, Steam Deck and Steam Controller (2026) support.
 
+I have made a small [Discord server](https://discord.gg/TWpvAxX5GW) for sharing MIDI files and updates easier for anyone interested.
+
 ## How To
 
-1. Turn on your Steam Controller (2015 or 2026) or Steam Deck
-2. Drag the MIDI file onto the steam-haptics-singer executable
-3. If prompted, press Enter
+Turn on your Steam Controller (2015 or 2026) or Steam Deck
+
+#### On Linux
+1. Right click inside the folder
+2. Click "Open in Terminal" 
+3. Type `chmod +x steam-haptics-singer` to make the program executable
+4. Type `./steam-haptics-singer [name of your midi file]` to run
+5. Enjoy!
+#### On Windows
+1. Click the open space in the folder path at the top in file explorer
+2. Type in "cmd"
+3. Type `steam-haptics-singer.exe [name of your midi file]` to run
 4. Enjoy!
 
 ### Where can I find midi songs?
@@ -20,41 +31,35 @@ Songs ready to play can be found in the original guy's [personal collection](htt
 	  -d DEBUG_LEVEL	Libusb debug level. Default is 0, no debug output. max is 4, max verbosity output
 	  -p	Repeat song, plays again after ending
 	  -e 	Direct velocity to gain control, the MIDI file will set the gain"
-	  -t	(Steam Controller 2026 Only) Only use trackpads
-	  -b	(Steam Controller 2026 Only) Map first two channels to rumble instead of trackpads
-	  -s	(Steam Controller 2026 Only) Swap channel mapping between haptics and rumble
-	  -a	Use audio mode (requires ffmpeg in PATH). Non-.mid inputs auto-select audio mode
+	  -t	(Steam Controller 2026 Only) Limit to only two channels"
+	  -s	(Steam Controller 2026 Only) Swap rumble and trackpad channels"
 
 ### MIDI files tips:
 
 MIDI files may need to be edited with a software such as [MidiEditor](https://www.midieditor.org/) to be correctly played with Steam Haptics Singer following the next tips:
 
-* Notes from MIDI channel 0 are played on right haptic
-* Notes from MIDI channel 1 are played on left haptic
-* Notes from MIDI channel 2 are played on right rumble (Steam Controller 2026 only)
-* Notes from MIDI channel 3 are played on left rumble (Steam Controller 2026 only)
+* Notes from MIDI channel 0 are played on right haptic/rumble
+* Notes from MIDI channel 1 are played on left haptic/rumble
+* Notes from MIDI channel 2 are played on right haptic (Steam Controller 2026 only)
+* Notes from MIDI channel 3 are played on left haptic (Steam Controller 2026 only)
 * Notes from others channels are ignored
 * **Avoid multiple notes active at the same time on the same channel**, since haptic actuators can only play one note at the time.
 
 
 ## Compiling
 
-You will need libusb(-dev) and pkgconf. If you have them, just type `make`.
-
-It's recommended to build this in a container such as [steam-runtime](https://github.com/ValveSoftware/steam-runtime?tab=readme-ov-file#building-in-the-runtime) or [holo-docker](https://github.com/SteamDeckHomebrew/holo-docker) in order for the packges to line up with the Steam Deck.
-
-If you go the steam-runtime route, make sure to use sniper as scout is outdated.
-
-### For a guide:
-	git clone -b master https://github.com/CrazyCritic89/SteamHapticsSinger.git
-	cd SteamHapticsSinger
-	podman run --rm -v ./:/src -it registry.gitlab.steamos.cloud/steamrt/sniper/sdk bash
-	cd src
-	make
-	exit
-
+You will need libusb(-dev), hidapi-hidraw, and pkgconf. If you have them, just type `make`.
 
 ## Changelog
+
+[v1.11.1]
+* Steam Controller (2026) now defaults to using rumble for the first two channels
+* Removed -t and -b parameters
+* Added -s parameter to swap the rumble and trackpad channels (credit to @Pixel1011 for the idea)
+* Added -t parameter to limit to only two channels (can work in tandem with -s)
+* Fixed -d paramter
+* Renamed "rumble" to "haptic" in playback display (temporary)
+* Errors now give names instead of values
 
 [v1.11]
 * Back rumble haptic support for the Steam Controller (2026)
