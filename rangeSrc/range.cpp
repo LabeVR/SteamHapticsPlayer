@@ -20,7 +20,7 @@ int main(int argc, char* argv[]) {
   //while (1) {
     //c->playNote(0, 40, 0xFF);
     //c->playNote(1, 40, 0xFF);
-    c->playNote(x, 50, 0xFF);
+    c->playNote(0xFF, 50, 0xFF);
     //c->playNote(3, 127, 0xFF);
 
     //c->playNote(0, -1, 0xFF);

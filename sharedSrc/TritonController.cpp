@@ -10,7 +10,6 @@
 5 - everything (or maybe both rumbles?) + restart
 6 - both trackpads
 7 - nothing
-256 - left trackpad and maybe left rumble too?
 */
 
 
