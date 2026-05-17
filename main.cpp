@@ -199,13 +199,9 @@ int SteamHaptics_PlayNote(SteamControllerInfos* controller, int channel, int not
 		}
 		
 		r = hid_write(controller->hid_handle,dataBlob,65);
-		if(r < 0) {
-			// Try feature report as fallback just in case Triton requires it on Windows
-			r = hid_send_feature_report(controller->hid_handle, dataBlob, 65);
-			if (r < 0) {
+		if (r < 0) {
 				wprintf(L"Send Error, hid_error: %ls\n", hid_error(controller->hid_handle));
 				exit(0);
-			}
 		}
 		break;
 
