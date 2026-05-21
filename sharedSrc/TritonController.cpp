@@ -56,18 +56,18 @@ void TritonController::setupPCMStreaming() {
   // 1 - only right audio plays
   // 3-5 on their own, nothing plays
   // but then 0,3,4,5 seems to sound okay??
-  // idk im just leaving it at this for not to not risk audio quality, which they do seem to affect from testing
+  // idk im just leaving it at this to not risk audio quality, which they do seem to affect from testing
   // only needs to be setup once though per restart of the controller. then any pcm streamed to it will play just fine
 
-  uint8_t channels[] = {0, 1, 2, 3, 4, 5};
-  uint8_t params[] = {0, 1, 2, 4, 8, 16, 32, 64, 128};
+  byte channels[] = {0, 1, 2, 3, 4, 5};
+  byte params[] = {0, 1, 2, 4, 8, 16, 32, 64, 128};
   int reps = 10;
 
   int totalSteps = (sizeof(channels) / sizeof(channels[0])) * (sizeof(params) / sizeof(params[0])) * reps;
   int completed = 0;
   std::size_t lastStatusLen = 0;
-  for (uint8_t ch : channels) {
-    for (uint8_t p : params) {
+  for (byte ch : channels) {
+    for (byte p : params) {
       byte enable[4] = {0x86, 0x02, ch, p};
       sendRaw(enable, 4);
       std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -76,7 +76,7 @@ void TritonController::setupPCMStreaming() {
         buff[0] = 0x88;
         buff[1] = 31;
         for (int i = 0; i < 31; i++) {
-          uint8_t sample = ((i / 4) % 2) ? 0xFF : 0x00;
+          byte sample = ((i / 4) % 2) ? 0xFF : 0x00;
           buff[2 + i] = sample;
           buff[33 + i] = sample;
         }
@@ -96,5 +96,8 @@ void TritonController::setupPCMStreaming() {
     }
   }
   std::cout << std::endl
-            << "Setup finished." << std::endl;
+            << "Setup finished." 
+            << std::endl
+            << "If your audio sounds good, you can skip this step with -s"
+            << std::endl;
 }

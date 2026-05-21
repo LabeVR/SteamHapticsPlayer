@@ -1,4 +1,4 @@
-all: range play-pcm
+all: range steam-haptics-player
 
 CXXFLAGS = -std=c++20 `pkg-config --libs --cflags hidapi`
 
@@ -9,5 +9,5 @@ PCM_SRC = $(wildcard playPCMSrc/*.cpp playPCMSrc/*/*.cpp playPCMSrc/*.c playPCMS
 range: $(RANGE_SRC) $(SHARED_SRC)
 	g++ -IsharedSrc -o range $^ $(CXXFLAGS)
 
-play-pcm: ${PCM_SRC} ${SHARED_SRC}
-	g++ -IsharedSrc -municode -o play-pcm $^ $(CXXFLAGS)
+steam-haptics-player: ${PCM_SRC} ${SHARED_SRC}
+	g++ -IsharedSrc -municode -o steam-haptics-player $^ $(CXXFLAGS)

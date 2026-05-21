@@ -77,23 +77,30 @@ int wmain(int argc, wchar_t* argv[]) {
     return 1;
   }
 
-  //c->setupPCMStreaming();
+  if (args.setup) c->setupPCMStreaming();
+
+  // remove first chunk to avoid cutting out first little bit of audio
+  byte primeBuf[NEED_BYTES];
+  int pr = aou.getBytes(primeBuf, NEED_BYTES);
+  (void)pr;
 
   auto next_packet = std::chrono::steady_clock::now();
 
+  std::cout << "Playing audio..." << std::endl;
+
   while (true) {
-    uint8_t tmp[NEED_BYTES];
+    byte tmp[NEED_BYTES];
     int r = aou.getBytes(tmp, NEED_BYTES);
     if (r <= 0) break;
     if (r < NEED_BYTES) std::memset(tmp + r, 0, NEED_BYTES - r); // s8 silence = 0
 
     byte buff[64] = {0};
-    buff[0] = 0x88;
-    buff[1] = 31;
+    buff[0] = 0x88; //cmd
+    buff[1] = 31; //length var
 
     for (int i = 0; i < SAMPLES_PER_PACKET; i++) {
-      uint8_t left = tmp[i * 2];
-      uint8_t right = tmp[i * 2 + 1];
+      byte left = tmp[i * 2];
+      byte right = tmp[i * 2 + 1];
       buff[2 + i] = left;
       buff[33 + i] = right;
     }
