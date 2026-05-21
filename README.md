@@ -28,6 +28,9 @@ This project allows stereo audio to be streamed from a file to the haptics of a 
 	Usage: play-pcm.exe [-s] <file path>
           -s  Skip running the setup phase (if you have already run it once and havent restarted your controller)
 
+### Tips
+  - Try pressing the controller down into a solid object (although not too hard), it will make the sound **much** louder
+
 ### Troubleshooting
 - **No audio:**  
   - Ensure you ran the setup phase (do not use `-s`) at least once since the controller was last started.
