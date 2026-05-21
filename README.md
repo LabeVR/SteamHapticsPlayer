@@ -75,3 +75,5 @@ I spent alot of time and effort reverse engineering the Steam controller's firmw
 
 I was also heavily inspired to do this by CrazyCritic89's [SteamHapticsSinger](https://github.com/CrazyCritic89/SteamHapticsSinger). I suggest checking it out if you wish to play MIDI files on the steam controller!
 (they honestly can sound better than this at times)
+
+If you do happen to make a video with this, please do link back to this github repo so others can try too :steamhappy:
