@@ -1,6 +1,6 @@
 all: range play-pcm
 
-CXXFLAGS = -std=c++20 -fpermissive `pkg-config --libs --cflags libusb-1.0 hidapi`
+CXXFLAGS = -std=c++20 -municode `pkg-config --libs --cflags libusb-1.0 hidapi`
 
 SHARED_SRC = $(wildcard sharedSrc/*.cpp sharedSrc/*/*.cpp sharedSrc/*.c sharedSrc/*/*.c)
 RANGE_SRC = $(wildcard rangeSrc/*.cpp rangeSrc/*/*.cpp rangeSrc/*.c rangeSrc/*/*.c)

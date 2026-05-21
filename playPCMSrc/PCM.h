@@ -1,17 +1,29 @@
 #pragma once
-#include <fstream>
-#include <string>
+
+#include <cstdint>
+#include <cstdio>
 #include <filesystem>
+#include <string>
 
 class PCM {
 private:
-std::ifstream file;
-static const int CHUNK_SIZE = 8;
+  std::wstring filePath;
+  FILE* pipe = nullptr;
+  bool ended = false;
 
-public:
+  static constexpr int CHUNK_SIZE = 8;
+  
+  std::wstring buildCommand() const;
+  void start();
+  
+  public:
   std::uintmax_t fileSize;
-  PCM(const std::string& filePath);
+  PCM();
   ~PCM();
+  
+  void stop();
+  // Returns 0 on success, -1 on failure.
+  int load(const std::wstring& filePath);
 
   int getNextChunk(unsigned char* buffer);
   // Read up to `size` bytes into buffer. Returns number of bytes read, 0 on EOF, or -1 on error.

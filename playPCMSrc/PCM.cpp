@@ -1,52 +1,105 @@
 #include "PCM.h"
+#include <cstdlib>
+#include <sstream>
 #include <stdexcept>
 
-PCM::PCM(const std::string& filePath) {
-  file.open(filePath, std::ios::binary);
-  if (!file.is_open()) {
-    throw std::runtime_error("Could not open PCM file: " + filePath);
-  }
-  fileSize = std::filesystem::file_size(filePath);
-}
+#ifdef _WIN32
+#define POPEN _wpopen
+#define PCLOSE _pclose
+#else
+#define POPEN popen
+#define PCLOSE pclose
+#endif
+
+PCM::PCM() : filePath(), pipe(nullptr), ended(false), fileSize(0) {}
 
 PCM::~PCM() {
-  if (file.is_open()) {
-    file.close();
+  stop();
+}
+
+int PCM::load(const std::wstring& filePath) {
+  stop();
+  this->filePath = filePath;
+
+  if (this->filePath.empty()) {
+    return -1;
   }
+
+  try {
+    fileSize = std::filesystem::file_size(std::filesystem::path(filePath));
+  } catch (...) {
+    fileSize = 0;
+  }
+
+  try {
+    start();
+  } catch (...) {
+    return -1;
+  }
+
+  return 0;
+}
+
+std::wstring PCM::buildCommand() const {
+  std::wostringstream cmd;
+
+  cmd << L"ffmpeg -hide_banner -loglevel error "
+      << L"-i \"" << filePath << L"\" "
+      << L"-f s8 -ac 2 -ar 8000 -acodec pcm_s8 pipe:1";
+  return cmd.str();
+}
+
+void PCM::start() {
+  stop();
+
+  if (filePath.empty()) {
+    throw std::runtime_error("No input file loaded");
+  }
+
+  std::wstring command = buildCommand();
+  pipe = POPEN(command.c_str(), L"rb");
+  if (!pipe) {
+    throw std::runtime_error("Could not start ffmpeg");
+  }
+  ended = false;
+}
+
+void PCM::stop() {
+  if (pipe) {
+    PCLOSE(pipe);
+    pipe = nullptr;
+  }
+  ended = true;
 }
 
 int PCM::getNextChunk(unsigned char* buffer) {
-  if (!file.is_open()) {
-    return -1;
-  }
-  file.read(reinterpret_cast<char*>(buffer), CHUNK_SIZE);
-  std::streamsize bytesRead = file.gcount();
-
-  if (file.fail() && !file.eof()) {
-    return -1;  // error
-  }
-
-  return static_cast<int>(bytesRead);
+  return getBytes(buffer, CHUNK_SIZE);
 }
 
 int PCM::getBytes(unsigned char* buffer, int size) {
-  if (!file.is_open()) return -1;
-  if (size <= 0) return 0;
+  if (!pipe || size <= 0) {
+    return -1;
+  }
 
-  file.read(reinterpret_cast<char*>(buffer), size);
-  std::streamsize bytesRead = file.gcount();
+  std::size_t bytesRead = std::fread(buffer, 1, static_cast<std::size_t>(size), pipe);
+  if (bytesRead == 0) {
+    if (std::feof(pipe)) {
+      ended = true;
+      return 0;
+    }
+    if (std::ferror(pipe)) {
+      ended = true;
+      return -1;
+    }
+  }
 
-  if (file.fail() && !file.eof()) return -1;
   return static_cast<int>(bytesRead);
 }
 
 bool PCM::eof()  {
-  return file.eof();
+  return ended;
 }
 
 void PCM::reset() {
-  if (file.is_open()) {
-    file.clear();
-    file.seekg(0, std::ios::beg);
-  }
+  start();
 }
