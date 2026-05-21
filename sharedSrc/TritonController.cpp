@@ -1,16 +1,6 @@
 #include "TritonController.h"
 #include "Constants.h"
-
-// channel maps
-/*
-0 - left trackpad
-1 - right trackpad
-3 - both rumbles
-4 - right rumble
-5 - everything (or maybe both rumbles?) + restart
-6 - both trackpads
-7 - nothing
-*/
+#include <cmath>
 
 
 TritonController::TritonController(hid_device *handle) : SteamController(ControllerType::Triton) {
@@ -22,22 +12,26 @@ void TritonController::close() {
 }
 
 int TritonController::playNote(int channel, int note, int velocity) {
-  byte packet[65] = {0};
   double frequency = midiFrequency[note];
-  double period = 1 / frequency;
+  return playFrequency(channel, frequency, velocity);  
+}
 
-  if (note == -1) {
+int TritonController::playFrequency(int channel, double frequency, int velocity) {
+    byte packet[65] = {0};
+    if (frequency == -1) {
     // This prevents the controller from rebooting when using rumble motors and drifting out of tune
     packet[0] = 0x81;
     packet[1] = channel;
   } else {
+    int frequencyValue = static_cast<int>(frequency);
     packet[0] = 0x83;
     packet[1] = channel;
     packet[2] = velocity;
-    packet[3] = (int)frequency % 0xFF;
-    packet[4] = (int)frequency / 0xFF;
+    packet[3] = frequencyValue & 0xFF;
+    packet[4] = (frequencyValue >> 8) & 0xFF;
     packet[5] = 0xFF;
-    packet[6] = 0x7F;
+    // 1 = 0.25 secs (i think)
+    packet[6] = 0x64;
   }
   return sendRaw(packet, sizeof(packet));
 }

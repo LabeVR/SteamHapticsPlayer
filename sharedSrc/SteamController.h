@@ -24,6 +24,7 @@ protected:
   virtual ~SteamController() = default;
   virtual void close() = 0;
   virtual int playNote(int channel, int note, int velocity) = 0;
+  virtual int playFrequency(int channel, double frequency, int velocity) = 0;
   virtual int sendRaw(byte bytes[], size_t length) = 0;
   
 };

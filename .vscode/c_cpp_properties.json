@@ -4,7 +4,8 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceFolder}/**",
-                "C:/msys64/ucrt64/include/**"
+                "C:/msys64/ucrt64/include/**",
+                "${workspaceFolder}/sharedSrc"
             ],
             "defines": [
                 "_DEBUG",
@@ -12,8 +13,8 @@
                 "_UNICODE"
             ],
             "compilerPath": "C:/msys64/ucrt64/bin/g++.exe",
-            "cStandard": "c17",
-            "cppStandard": "c++17",
+            "cStandard": "c23",
+            "cppStandard": "c++26",
             "intelliSenseMode": "gcc-x64"
         }
     ],

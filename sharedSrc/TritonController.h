@@ -9,5 +9,6 @@ class TritonController : public SteamController {
     TritonController(hid_device* handle);
     void close() override;
     int playNote(int channel, int note, int velocity) override;
+    int playFrequency(int channel, double frequency, int velocity) override;
     int sendRaw(byte bytes[], size_t length) override; 
 };
