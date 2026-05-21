@@ -11,6 +11,16 @@
 #define PCLOSE pclose
 #endif
 
+namespace {
+bool ffmpegAvailable() {
+#ifdef _WIN32
+  return std::system("ffmpeg -version >nul 2>nul") == 0;
+#else
+  return std::system("ffmpeg -version >/dev/null 2>&1") == 0;
+#endif
+}
+}
+
 PCM::PCM() : filePath(), pipe(nullptr), ended(false), fileSize(0) {}
 
 PCM::~PCM() {
@@ -29,6 +39,10 @@ int PCM::load(const std::wstring& filePath) {
     fileSize = std::filesystem::file_size(std::filesystem::path(filePath));
   } catch (...) {
     fileSize = 0;
+  }
+
+  if (!ffmpegAvailable()) {
+    return -2;
   }
 
   try {

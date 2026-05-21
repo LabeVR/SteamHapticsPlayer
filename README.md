@@ -24,8 +24,6 @@ This project allows stereo audio to be streamed from a file to the haptics of a 
 6. Profit!
 
 
-
-
 ### Usage from command prompt:
 	Usage: play-pcm.exe [-s] <file path>
           -s  Skip running the setup phase (if you have already run it once and havent restarted your controller)
@@ -39,7 +37,8 @@ This project allows stereo audio to be streamed from a file to the haptics of a 
   - Restart the controller and try again.
 - **ffmpeg not found / decode errors:**  
   - Install `ffmpeg` and ensure it is on your `PATH` (`winget install ffmpeg` on Windows).
-
+- **if all else fails:**
+  - Try connect the steam controller directly via USB and then trying.
 ## Compiling
 **Build (Linux / WSL)**
 

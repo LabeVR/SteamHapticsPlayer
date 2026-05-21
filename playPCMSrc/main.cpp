@@ -4,6 +4,7 @@
 #include <chrono>
 #include <cstdint>
 #include <cstring>
+#include <csignal>
 #include <thread>
 #include <iostream>
 #include <iomanip>
@@ -72,8 +73,13 @@ int wmain(int argc, wchar_t* argv[]) {
     c = static_cast<TritonController*>(cont);
   if (c == nullptr) return 1;
 
-  if (aou.load(args.filePath) < 0) {
-    std::wcout << L"ffmpeg could not load " << args.filePath;
+  int loadResult = aou.load(args.filePath);
+  if (loadResult < 0) {
+    if (loadResult == -2) {
+      std::wcout << L"ffmpeg was not found on PATH";
+    } else {
+      std::wcout << L"ffmpeg could not load " << args.filePath;
+    }
     return 1;
   }
 
