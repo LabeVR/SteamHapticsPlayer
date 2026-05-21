@@ -5,6 +5,7 @@ This project allows stereo audio to be streamed from a file to the haptics of a 
 ## How To
 
 **Supported device:** Steam Controller (2026). Other controllers are unsupported.
+
 **Requirements:** FFmpeg on PATH
 
 #### On Windows
