@@ -7,7 +7,13 @@ This project allows stereo audio to be streamed from a file to the haptics of a 
 **Supported device:** Steam Controller (2026). Other controllers are unsupported.
 **Requirements:** FFmpeg on PATH
 
-#### On Linux
+#### On Windows
+1. Open Powershell
+2. (skip if already installed) Install FFmpeg with `winget install ffmpeg`
+3. Run the program with `.\steam-haptics-player [AUDIO_FILE]`
+4. Profit!
+5. 
+#### On Linux (not available for the moment)
 1. Right click inside the folder
 2. Click "Open in Terminal"
 3. (skip if already installed) Install FFmpeg with a package manager of your choice 
@@ -15,11 +21,7 @@ This project allows stereo audio to be streamed from a file to the haptics of a 
 5. Run the program with `.\steam-haptics-player [AUDIO_FILE]`
 6. Profit!
 
-#### On Windows
-1. Open Powershell
-2. (skip if already installed) Install FFmpeg with `winget install ffmpeg`
-3. Run the program with `.\steam-haptics-player [AUDIO_FILE]`
-4. Profit!
+
 
 
 ### Usage from command prompt:
