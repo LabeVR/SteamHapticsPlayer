@@ -10,5 +10,6 @@ class TritonController : public SteamController {
     void close() override;
     int playNote(int channel, int note, int velocity) override;
     int playFrequency(int channel, double frequency, int velocity) override;
-    int sendRaw(byte bytes[], size_t length) override; 
+    int sendRaw(byte bytes[], size_t length) override;
+    void setupPCMStreaming();
 };

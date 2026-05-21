@@ -10,6 +10,7 @@
 
 // mainly for now to figure out wtf i am doing
 // but will eventually use to figure out the range of notes the steam controller can make nicely
+// scratch above, if wondering why this is called range, its because of that, but not its just so i can send raw bytes from terminal and i couldnt be bothered to rename :p
 // channel maps
 /*
 0 - left trackpad

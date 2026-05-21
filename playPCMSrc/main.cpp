@@ -5,6 +5,8 @@
 #include <cstdint>
 #include <cstring>
 #include <thread>
+#include <iostream>
+#include <iomanip>
 
 TritonController* c = nullptr;
 ControllerFinder finder;
@@ -27,29 +29,7 @@ int main(int argc, char* argv[]) {
   if (argc < 2) return 1;
   PCM* aou = new PCM(std::string(argv[1]));
 
-  std::cout << "Running setup for pcm streaming! You may hear some weird noises" << std::endl;
-  uint8_t channels[] = {1, 2, 3, 4, 5};
-  uint8_t params[] = {0, 1, 2, 4, 8, 16, 32, 64};
-  for (uint8_t ch : channels) {
-    for (uint8_t p : params) {
-      byte enable[4] = {0x86, 0x02, ch, p};
-      c->sendRaw(enable, 4);
-      std::this_thread::sleep_for(std::chrono::milliseconds(100));
-      for (int rep = 0; rep < 50; rep++) {
-        byte buff[64] = {0};
-        buff[0] = 0x88;
-        buff[1] = 31;
-        for (int i = 0; i < 31; i++) {
-          uint8_t sample = ((i / 4) % 2) ? 0xFF : 0x00;
-          buff[2 + i] = sample;
-          buff[33 + i] = sample;
-        }
-        c->sendRaw(buff, 64);
-        std::this_thread::sleep_for(std::chrono::microseconds(1000));
-      }
-    }
-  }
-  std::cout << "Setup finished. Playing audio..." << std::endl;
+  c->setupPCMStreaming();
 
   auto next_packet = std::chrono::steady_clock::now();
 
@@ -66,8 +46,8 @@ int main(int argc, char* argv[]) {
     for (int i = 0; i < SAMPLES_PER_PACKET; i++) {
       uint8_t left = tmp[i * 2];
       uint8_t right = tmp[i * 2 + 1];
-      buff[2 + i] = right;
-      buff[33 + i] = left;
+      buff[2 + i] = left;
+      buff[33 + i] = right;
     }
 
     c->sendRaw(buff, 64);
