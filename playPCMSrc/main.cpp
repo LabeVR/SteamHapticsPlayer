@@ -7,17 +7,49 @@
 #include <thread>
 #include <iostream>
 #include <iomanip>
-
+#include <Constants.h>
 TritonController* c = nullptr;
 ControllerFinder finder;
 PCM aou;
 
+struct Args {
+  bool setup = true;
+  std::wstring filePath;
+  std::wstring help;
+};
+
 constexpr int SAMPLES_PER_PACKET = 31;
 constexpr int BYTES_PER_FRAME = 2;
 constexpr int NEED_BYTES = SAMPLES_PER_PACKET * BYTES_PER_FRAME;
-constexpr int SAMPLE_RATE = 8000;
+constexpr int SAMPLE_RATE = 8000; // steam controller only supports up to 8khz
 const auto period = std::chrono::microseconds(
     (SAMPLES_PER_PACKET * 1000000) / SAMPLE_RATE);
+
+std::wstring helpString = 
+          L"Usage: play-pcm.exe [-s] <file path>\n"
+          L"  -s  Skip running the setup phase (if you have already run it once and havent restarted your controller)\n";
+Args parseArgs(int argc, wchar_t* argv[]) {
+  Args args;
+
+  for (int i = 1; i < argc; ++i) {
+    std::wstring arg = argv[i];
+
+    if (arg == L"-s") {
+      args.setup = false;
+    } else if (!arg.empty() && arg[0] == L'-') {
+      args.help = helpString;
+      return args;
+    } else {
+      args.filePath = arg;
+    }
+  }
+
+  if (args.filePath.empty()) {
+    args.help = helpString;
+  }
+
+  return args;
+}
 
 
 void reset(int) {
@@ -26,8 +58,13 @@ void reset(int) {
 }
 
 
-
 int wmain(int argc, wchar_t* argv[]) {
+  Args args = parseArgs(argc, argv);
+  if (!args.help.empty()) {
+    std::wcout << args.help;
+    return 1;
+  }
+
   SteamController* cont = finder.getController();
   if (cont == nullptr) return 1;
 
@@ -35,10 +72,8 @@ int wmain(int argc, wchar_t* argv[]) {
     c = static_cast<TritonController*>(cont);
   if (c == nullptr) return 1;
 
-  if (argc < 2) return 1;
-
-  if (aou.load(std::filesystem::path(argv[1]).wstring()) < 0) {
-    std::wcout << "ffmpeg could not load " << argv[1];
+  if (aou.load(args.filePath) < 0) {
+    std::wcout << L"ffmpeg could not load " << args.filePath;
     return 1;
   }
 

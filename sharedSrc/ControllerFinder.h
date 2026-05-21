@@ -2,6 +2,8 @@
 #include "SteamController.h"
 #include "TritonController.h"
 #include <iostream>
+#include <cstdint>
+
 
 class ControllerFinder {
   private:

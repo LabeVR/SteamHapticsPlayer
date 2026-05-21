@@ -1,7 +1,6 @@
 #pragma once
-#include <libusb.h>
 #include <hidapi.h>
-
+#include "Constants.h"
 enum class ControllerType {
 	None,
 	Original,
