@@ -6,6 +6,7 @@ PCM::PCM(const std::string& filePath) {
   if (!file.is_open()) {
     throw std::runtime_error("Could not open PCM file: " + filePath);
   }
+  fileSize = std::filesystem::file_size(filePath);
 }
 
 PCM::~PCM() {
