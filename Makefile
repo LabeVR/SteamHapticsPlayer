@@ -1,13 +1,13 @@
-all: steam-haptics-singer range
+all: range play-pcm
 
-CXXFLAGS = -fpermissive `pkg-config --libs --cflags libusb-1.0 hidapi`
+CXXFLAGS = -std=c++20 -fpermissive `pkg-config --libs --cflags libusb-1.0 hidapi`
 
 SHARED_SRC = $(wildcard sharedSrc/*.cpp sharedSrc/*/*.cpp sharedSrc/*.c sharedSrc/*/*.c)
-SINGER_SRC = $(wildcard SteamHapticsSingerSrc/*.cpp SteamHapticsSingerSrc/*/*.cpp SteamHapticsSingerSrc/*.c SteamHapticsSingerSrc/*/*.c)
 RANGE_SRC = $(wildcard rangeSrc/*.cpp rangeSrc/*/*.cpp rangeSrc/*.c rangeSrc/*/*.c)
-
-steam-haptics-singer: $(SINGER_SRC)
-	g++ -o steam-haptics-singer $^ $(CXXFLAGS)
+PCM_SRC = $(wildcard playPCMSrc/*.cpp playPCMSrc/*/*.cpp playPCMSrc/*.c playPCMSrc/*/*.c)
 
 range: $(RANGE_SRC) $(SHARED_SRC)
 	g++ -IsharedSrc -o range $^ $(CXXFLAGS)
+
+play-pcm: ${PCM_SRC} ${SHARED_SRC}
+	g++ -IsharedSrc -o play-pcm $^ $(CXXFLAGS)
