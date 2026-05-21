@@ -12,7 +12,8 @@ This project allows stereo audio to be streamed from a file to the haptics of a 
 2. (skip if already installed) Install FFmpeg with `winget install ffmpeg`
 3. Run the program with `.\steam-haptics-player [AUDIO_FILE]`
 4. Profit!
-5. 
+
+
 #### On Linux (not available for the moment)
 1. Right click inside the folder
 2. Click "Open in Terminal"
@@ -39,11 +40,6 @@ This project allows stereo audio to be streamed from a file to the haptics of a 
   - Install `ffmpeg` and ensure it is on your `PATH` (`winget install ffmpeg` on Windows).
 
 ## Compiling
-
-**Prerequisites**
-- `ffmpeg` (available on PATH)
-- `pkg-config` and `hidapi` development headers for building
-
 **Build (Linux / WSL)**
 
 *Note that currently there is no linux build as i catered to windows being bad and such used wide strings/etc, may honestly revert that for linux support*
