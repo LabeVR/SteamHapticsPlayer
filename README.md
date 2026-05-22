@@ -18,10 +18,11 @@ This project allows stereo audio to be streamed from a file to the haptics of a 
 #### On Linux (not available for the moment)
 1. Right click inside the folder
 2. Click "Open in Terminal"
-3. (skip if already installed) Install FFmpeg with a package manager of your choice 
-4. Type `chmod +x steam-haptics-singer` to make the program executable
-5. Run the program with `.\steam-haptics-player [AUDIO_FILE]`
-6. Profit!
+3. (skip if already installed) Install FFmpeg with a package manager of your choice
+4. Install libusb (with i believe is either `sudo apt install libhidapi-dev` or `sudo pacman -S hidapi`)
+5. Type `chmod +x steam-haptics-singer` to make the program executable
+6. Run the program with `.\steam-haptics-player [AUDIO_FILE]`
+7. Profit!
 
 
 ### Usage from command prompt:
@@ -38,10 +39,12 @@ This project allows stereo audio to be streamed from a file to the haptics of a 
   - Re-run without `-s`. If issues persist, restart the controller and run setup again.
 - **Loud static immediately on launch:**  
   - Restart the controller and try again.
-- **ffmpeg not found / decode errors:**  
+- **ffmpeg not found**  
   - Install `ffmpeg` and ensure it is on your `PATH` (`winget install ffmpeg` on Windows).
 - **if all else fails:**
-  - Try connect the steam controller directly via USB and then trying.
+  - Try connect the steam controller directly via USB and then try again.
+
+
 ## Compiling
 **Build (Linux / WSL)**
 

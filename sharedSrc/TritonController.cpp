@@ -81,7 +81,8 @@ void TritonController::setupPCMStreaming() {
           buff[33 + i] = sample;
         }
         sendRaw(buff, 64);
-        std::this_thread::sleep_for(std::chrono::microseconds(1000));
+        // fun fact, windows likes to lie if it spent 1ms waiting when in reality it was spending >10ms
+        std::this_thread::sleep_for(std::chrono::microseconds(15000));
 
         completed++;
         double percent = (100.0 * completed) / (double)totalSteps;

@@ -2,42 +2,50 @@
 #include <ControllerFinder.h>
 #include <TritonController.h>
 #include <chrono>
-#include <cstdint>
-#include <cstring>
 #include <csignal>
-#include <thread>
+#include <cstring>
+#include <filesystem>
 #include <iostream>
-#include <iomanip>
-#include <Constants.h>
+#include <string>
+#include <thread>
+
 TritonController* c = nullptr;
 ControllerFinder finder;
+// if anyone is wondering why this is called aou, consult this video https://www.youtube.com/watch?v=kiFCFlAUy_8
 PCM aou;
 
 struct Args {
   bool setup = true;
-  std::wstring filePath;
-  std::wstring help;
+  path_t filePath;
+  std::string help;
 };
+
 
 constexpr int SAMPLES_PER_PACKET = 31;
 constexpr int BYTES_PER_FRAME = 2;
 constexpr int NEED_BYTES = SAMPLES_PER_PACKET * BYTES_PER_FRAME;
-constexpr int SAMPLE_RATE = 8000; // steam controller only supports up to 8khz
-const auto period = std::chrono::microseconds(
-    (SAMPLES_PER_PACKET * 1000000) / SAMPLE_RATE);
+constexpr int SAMPLE_RATE = 8000; // steam controller only supports up to signed 8 bit, 8khz
+const auto period = std::chrono::microseconds((SAMPLES_PER_PACKET * 1000000) / SAMPLE_RATE);
 
-std::wstring helpString = 
-          L"Usage: play-pcm.exe [-s] <file path>\n"
-          L"  -s  Skip running the setup phase (if you have already run it once and havent restarted your controller)\n";
-Args parseArgs(int argc, wchar_t* argv[]) {
+const std::string helpString =
+    "Usage: play-pcm.exe [-s] <file path>\n"
+    "  -s  Skip running the setup phase if you've already run it once and haven't restarted your controller\n";
+
+void reset(int) {
+  aou.stop();
+}
+
+template <typename ArgGetter>
+Args parseArgs(int argc, ArgGetter argAt) {
   Args args;
 
   for (int i = 1; i < argc; ++i) {
-    std::wstring arg = argv[i];
+    path_t arg = argAt(i);
+    std::string argStr = std::filesystem::path(arg).string();
 
-    if (arg == L"-s") {
+    if (argStr == "-s") {
       args.setup = false;
-    } else if (!arg.empty() && arg[0] == L'-') {
+    } else if (!argStr.empty() && argStr[0] == '-') {
       args.help = helpString;
       return args;
     } else {
@@ -45,54 +53,46 @@ Args parseArgs(int argc, wchar_t* argv[]) {
     }
   }
 
-  if (args.filePath.empty()) {
-    args.help = helpString;
-  }
-
+  if (args.filePath.empty()) args.help = helpString;
   return args;
 }
 
-
-void reset(int) {
-  aou.stop();
-  return;
-}
-
-
-int wmain(int argc, wchar_t* argv[]) {
-  Args args = parseArgs(argc, argv);
+int runPlayer(const Args& args) {
   if (!args.help.empty()) {
-    std::wcout << args.help;
+    std::cout << helpString;
     return 1;
   }
 
   SteamController* cont = finder.getController();
   if (cont == nullptr) return 1;
-
-  if (cont->type == ControllerType::Triton)
-    c = static_cast<TritonController*>(cont);
+  if (cont->type == ControllerType::Triton) c = static_cast<TritonController*>(cont);
   if (c == nullptr) return 1;
 
   int loadResult = aou.load(args.filePath);
   if (loadResult < 0) {
     if (loadResult == -2) {
-      std::wcout << L"ffmpeg was not found on PATH";
+      std::cout << "ffmpeg was not found on PATH\n";
     } else {
-      std::wcout << L"ffmpeg could not load " << args.filePath;
+#ifdef _WIN32
+      std::wcout << L"ffmpeg could not load " << args.filePath << L"\n";
+#else
+      std::cout << "ffmpeg could not load " << args.filePath << "\n";
+#endif
     }
     return 1;
   }
 
+  signal(SIGINT, reset);
+
   if (args.setup) c->setupPCMStreaming();
 
-  // remove first chunk to avoid cutting out first little bit of audio
   byte primeBuf[NEED_BYTES];
   int pr = aou.getBytes(primeBuf, NEED_BYTES);
   (void)pr;
 
   auto next_packet = std::chrono::steady_clock::now();
 
-  std::cout << "Playing audio..." << std::endl;
+  std::cout << "Playing audio...\n";
 
   while (true) {
     byte tmp[NEED_BYTES];
@@ -116,7 +116,23 @@ int wmain(int argc, wchar_t* argv[]) {
     next_packet += period;
     while (std::chrono::steady_clock::now() < next_packet) {}
   }
-  signal(SIGINT, reset);
+
   reset(0);
   return 0;
 }
+
+#ifdef _WIN32
+int wmain(int argc, wchar_t* argv[]) {
+  Args args = parseArgs(argc, [&](int index) -> path_t {
+    return std::wstring(argv[index]);
+  });
+  return runPlayer(args);
+}
+#else
+int main(int argc, char* argv[]) {
+  Args args = parseArgs(argc, [&](int index) -> path_t {
+    return std::filesystem::path(argv[index]).string();
+  });
+  return runPlayer(args);
+}
+#endif
