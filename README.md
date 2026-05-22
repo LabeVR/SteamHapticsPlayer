@@ -15,7 +15,7 @@ This project allows stereo audio to be streamed from a file to the haptics of a 
 4. Profit!
 
 
-#### On Linux (not available for the moment)
+#### On Linux
 1. Right click inside the folder
 2. Click "Open in Terminal"
 3. (skip if already installed) Install FFmpeg with a package manager of your choice
