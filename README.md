@@ -19,7 +19,7 @@ This project allows stereo audio to be streamed from a file to the haptics of a 
 1. Right click inside the folder
 2. Click "Open in Terminal"
 3. (skip if already installed) Install FFmpeg with a package manager of your choice
-4. Install libusb (with i believe is either `sudo apt install libhidapi-dev` or `sudo pacman -S hidapi`)
+4. Install libusb (with i believe either, `sudo apt install libhidapi-dev` or `sudo pacman -S hidapi`)
 5. Type `chmod +x steam-haptics-singer` to make the program executable
 6. Run the program with `.\steam-haptics-player [AUDIO_FILE]`
 7. Profit!
