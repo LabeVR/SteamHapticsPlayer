@@ -48,8 +48,8 @@ This project allows stereo audio to be streamed from a file to the haptics of a 
 ## Compiling
 **Build (Linux / WSL)**
 
-*Note that currently there is no linux build as i catered to windows being bad and such used wide strings/etc, may honestly revert that for linux support*
 ```bash
+sudo apt update
 sudo apt install build-essential pkg-config libhidapi-dev ffmpeg
 make
 ```
