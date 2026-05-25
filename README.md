@@ -4,6 +4,8 @@ This project allows stereo audio to be streamed from a file to the haptics of a 
 
 ## How To
 
+**When streaming audio via the Puck, you may encounter popping noises or other audio quality issues. USB audio should be much cleaner.**
+
 **Supported device:** Steam Controller (2026). Other controllers are unsupported.
 
 **Requirements:** FFmpeg on PATH
