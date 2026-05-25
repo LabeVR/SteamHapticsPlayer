@@ -9,10 +9,15 @@ This project allows stereo audio to be streamed from a file to the haptics of a 
 **Requirements:** FFmpeg on PATH
 
 #### On Windows
-1. Open Powershell
+1. Open Powershell in the file directory where you have extracted the executable
 2. (skip if already installed) Install FFmpeg with `winget install ffmpeg`
 3. Run the program with `.\steam-haptics-player [AUDIO_FILE]`
 4. Profit!
+
+OR
+1. (skip if already installed) Install FFmpeg with `winget install ffmpeg` in powershell
+2. Drag an audio file onto the executable.
+    - *This will not let you skip the setup portion of the program if it has already been run once, however it is the easier option*
 
 
 #### On Linux
