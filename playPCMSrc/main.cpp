@@ -90,10 +90,9 @@ int runPlayer(const Args& args) {
   int pr = aou.getBytes(primeBuf, NEED_BYTES);
   (void)pr;
 
-  auto next_packet = std::chrono::steady_clock::now();
+  auto nextPacketTime = std::chrono::steady_clock::now();
 
   std::cout << "Playing audio...\n";
-
   while (true) {
     byte tmp[NEED_BYTES];
     int r = aou.getBytes(tmp, NEED_BYTES);
@@ -113,8 +112,9 @@ int runPlayer(const Args& args) {
 
     c->sendRaw(buff, 64);
 
-    next_packet += period;
-    while (std::chrono::steady_clock::now() < next_packet) {}
+    
+    nextPacketTime += period;
+    while (std::chrono::steady_clock::now() < nextPacketTime) {}
   }
 
   reset(0);
