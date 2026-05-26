@@ -3,12 +3,17 @@
 hid_device* ControllerFinder::open_steam_controller_hid(uint16_t pid) {
   struct hid_device_info *devs = hid_enumerate(0x28DE, pid);
   hid_device *handle = NULL;
+  byte buf[64];
   for (struct hid_device_info *cur = devs; cur != NULL; cur = cur->next) {
     // printf("%u\n", cur->usage_page);
     if (cur->usage_page == 0xFF00) {
       handle = hid_open_path(cur->path);
-      if (handle) break;
+      if (handle) {
+        int r = hid_read_timeout(handle, buf, sizeof(buf), 100);
+        if (r > 0) { return handle; }
+      }
     }
+    handle = NULL;
   }
   hid_free_enumeration(devs);
   return handle;
@@ -25,7 +30,6 @@ ControllerFinder::ControllerFinder() {
 
 // basically completely stolen from SteamHapticsSinger
 SteamController* ControllerFinder::getController() {
-  int interfaceNum;
   ControllerType type;
 
   hid_device* hid_handle;
