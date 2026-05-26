@@ -5,6 +5,9 @@ SC_Singer
 *.opus
 *.wav
 *.exe
+*.m4a
+range
+steam-haptics-player
 
 ReverseEngineering
 PCM
