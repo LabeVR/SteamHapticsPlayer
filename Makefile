@@ -4,11 +4,11 @@ ifeq ($(OS),Windows_NT)
 HIDAPI_PKG ?= hidapi
 UNICODE_FLAG ?= -municode
 else
-HIDAPI_PKG ?= hidapi-hidraw
+HIDAPI_PKG ?= hidapi-hidraw 
 UNICODE_FLAG ?=
 endif
 
-CXXFLAGS = -std=c++20 -Wall -Werror -O2 `pkg-config --libs --cflags $(HIDAPI_PKG)`
+CXXFLAGS = -std=c++20 -Wall -Werror -g -Og `pkg-config --libs --cflags $(HIDAPI_PKG)`
 
 SHARED_SRC = $(wildcard sharedSrc/*.cpp sharedSrc/*/*.cpp sharedSrc/*.c sharedSrc/*/*.c)
 RANGE_SRC = $(wildcard rangeSrc/*.cpp rangeSrc/*/*.cpp rangeSrc/*.c rangeSrc/*/*.c)
