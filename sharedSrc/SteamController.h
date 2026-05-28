@@ -1,5 +1,6 @@
 #pragma once
 #include <hidapi.h>
+#include <cstdint>
 #include "Constants.h"
 enum class ControllerType {
 	None,

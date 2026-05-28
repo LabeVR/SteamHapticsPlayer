@@ -1,11 +1,11 @@
 #include "PCM.h"
+#include <cerrno>
 #include <cstdlib>
+#include <cstring>
+#include <fstream>
+#include <iostream>
 #include <sstream>
 #include <stdexcept>
-#include <iostream>
-#include <fstream>
-#include <cerrno> 
-#include <cstring>
 
 #ifdef _WIN32
 #define POPEN wpopen
@@ -14,7 +14,6 @@
 #define POPEN popen
 #define PCLOSE pclose
 #endif
-
 
 bool ffmpegAvailable() {
 #ifdef _WIN32
@@ -26,22 +25,13 @@ bool ffmpegAvailable() {
 
 PCM::PCM() : filePath(), pipe(nullptr), ended(false), fileSize(0) {}
 
-PCM::~PCM() {
-  stop();
-}
+PCM::~PCM() {}
 
 int PCM::load(const path_t& filePath) {
-  stop();
   this->filePath = filePath;
 
   if (this->filePath.empty()) {
     return -1;
-  }
-
-  try {
-    fileSize = std::filesystem::file_size(std::filesystem::path(filePath));
-  } catch (...) {
-    fileSize = 0;
   }
 
   if (!ffmpegAvailable()) {
@@ -63,6 +53,8 @@ path_t PCM::buildCommand() const {
 
   cmd << L"ffmpeg -hide_banner -loglevel error "
       << L"-i \"" << filePath << L"\" "
+      // maybe wii add volume later
+      //<< L"-af acompressor=threshold=-16dB:ratio=3:attack=5:release=80,highshelf=f=400:g=8,volume=2 -f s8 -ac 2 -ar 8000 -acodec pcm_s8 pipe:1";
       << L"-f s8 -ac 2 -ar 8000 -acodec pcm_s8 pipe:1";
   return cmd.str();
 #else
@@ -75,9 +67,9 @@ path_t PCM::buildCommand() const {
 #endif
 }
 
-void PCM::start() {
-  stop();
 
+// load file into memory
+void PCM::start() {
   if (filePath.empty()) {
     throw std::runtime_error("No input file loaded");
   }
@@ -89,49 +81,57 @@ void PCM::start() {
   std::string command = buildCommand();
   pipe = POPEN(command.c_str(), "r");
 #endif
-if (!pipe) {
+  if (!pipe) {
     std::cerr << "popen failed, errno=" << errno << " (" << strerror(errno) << ")\n";
     throw std::runtime_error("Could not start ffmpeg");
-}
+  }
   ended = false;
-}
-
-void PCM::stop() {
+  fileSize = 0;
+  while (!ended) {
+    uint8_t buff[64];
+    if (!pipe) break;
+    std::size_t bytesRead = std::fread(buff, 1, 64, pipe);
+    
+    if (bytesRead == 0) {
+      if (std::feof(pipe) || std::ferror(pipe)) {
+        ended = true;
+        break;
+      }
+    }
+    this->pcmBytes.insert(this->pcmBytes.end(), buff, buff + bytesRead);
+  }
   if (pipe) {
     PCLOSE(pipe);
     pipe = nullptr;
   }
-  ended = true;
+  fileSize = pcmBytes.size();
+  ended = false;
 }
 
-int PCM::getNextChunk(unsigned char* buffer) {
+int PCM::getNextChunk(uint8_t* buffer) {
   return getBytes(buffer, CHUNK_SIZE);
 }
 
-int PCM::getBytes(unsigned char* buffer, int size) {
-  if (!pipe || size <= 0) {
-    return -1;
+int PCM::getBytes(uint8_t* buffer, int size) {
+  if (size <= 0 || buffer == nullptr) return -1;
+  if (readPointer >= pcmBytes.size()) {
+    ended = true;
+    return 0;
   }
 
-  std::size_t bytesRead = std::fread(buffer, 1, static_cast<std::size_t>(size), pipe);
-  if (bytesRead == 0) {
-    if (std::feof(pipe)) {
-      ended = true;
-      return 0;
-    }
-    if (std::ferror(pipe)) {
-      ended = true;
-      return -1;
-    }
-  }
+  size_t avail = pcmBytes.size() - readPointer;
+  size_t toCopy = static_cast<size_t>(size);
+  if (avail < toCopy) toCopy = avail;
 
-  return static_cast<int>(bytesRead);
+  std::memcpy(buffer, pcmBytes.data() + readPointer, toCopy);
+  readPointer += toCopy;
+  if (readPointer >= pcmBytes.size()) ended = true;
+  return static_cast<int>(toCopy);
 }
 
-bool PCM::eof() {
-  return ended;
-}
 
 void PCM::reset() {
+  this->pcmBytes.clear();
+  this->readPointer = 0;
   start();
 }

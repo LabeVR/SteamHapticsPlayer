@@ -4,6 +4,7 @@
 #include <cstdio>
 #include <filesystem>
 #include <string>
+#include <vector>
 
 #ifdef _WIN32
 using path_t = std::wstring;
@@ -16,6 +17,8 @@ private:
   path_t filePath;
   FILE* pipe = nullptr;
   bool ended = false;
+  std::vector<uint8_t> pcmBytes = std::vector<uint8_t>();
+  size_t readPointer = 0;
 
   static constexpr int CHUNK_SIZE = 8;
   
@@ -27,15 +30,11 @@ private:
   PCM();
   ~PCM();
   
-  void stop();
-
   int load(const path_t& filePath);
 
+  int getNextChunk(uint8_t* buffer);
+  // Read up to `size` bytes into buffer. Returns number of bytes read, 0 on EOF, -1 on error
+  int getBytes(uint8_t* buffer, int size);
 
-  int getNextChunk(unsigned char* buffer);
-  // Read up to `size` bytes into buffer. Returns number of bytes read, 0 on EOF, or -1 on error.
-  int getBytes(unsigned char* buffer, int size);
-
-  bool eof();
   void reset();
 };

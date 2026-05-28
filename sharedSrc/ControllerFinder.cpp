@@ -54,6 +54,7 @@ SteamController* ControllerFinder::getController() {
     exit(0);
     break;
   case ControllerType::Triton:
+    std::cout << "Returning Triton controller..." << std::endl;
     return new TritonController(hid_handle);
     break; 
   default:

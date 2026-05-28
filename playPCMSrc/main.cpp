@@ -20,7 +20,6 @@ struct Args {
   std::string help;
 };
 
-
 constexpr int SAMPLES_PER_PACKET = 31;
 constexpr int BYTES_PER_FRAME = 2;
 constexpr int NEED_BYTES = SAMPLES_PER_PACKET * BYTES_PER_FRAME;
@@ -32,7 +31,7 @@ const std::string helpString =
     "  -s  Skip running the setup phase if you've already run it once and haven't restarted your controller\n";
 
 void reset(int) {
-  aou.stop();
+  // aou.stop();
 }
 
 template <typename ArgGetter>
@@ -93,28 +92,40 @@ int runPlayer(const Args& args) {
   auto nextPacketTime = std::chrono::steady_clock::now();
 
   std::cout << "Playing audio...\n";
+
+  MsgHapticPCMStereo packet;
+  int completed = 0;
+  std::size_t lastStatusLen = 0;
+  int totalSteps = aou.fileSize;
   while (true) {
     byte tmp[NEED_BYTES];
     int r = aou.getBytes(tmp, NEED_BYTES);
     if (r <= 0) break;
     if (r < NEED_BYTES) std::memset(tmp + r, 0, NEED_BYTES - r); // s8 silence = 0
 
-    byte buff[64] = {0};
-    buff[0] = 0x88; //cmd
-    buff[1] = 31; //length var
+    packet.length = 31;
 
     for (int i = 0; i < SAMPLES_PER_PACKET; i++) {
       byte left = tmp[i * 2];
       byte right = tmp[i * 2 + 1];
-      buff[2 + i] = left;
-      buff[33 + i] = right;
+      packet.left[i] = left;
+      packet.right[i] = right;
     }
 
-    c->sendRaw(buff, 64);
+    c->sendPCMStereo(&packet);
 
-    
     nextPacketTime += period;
-    while (std::chrono::steady_clock::now() < nextPacketTime) {}
+    completed += r;
+    double percent = (100.0 * completed) / (double)totalSteps;
+    std::ostringstream ss;
+    ss << "Playing: " << completed << "/" << totalSteps << " (" << std::fixed << std::setprecision(1) << percent << "%)";
+    std::string status = ss.str();
+    std::cout << '\r' << status;
+    if (lastStatusLen > status.size()) std::cout << std::string(lastStatusLen - status.size(), ' ');
+    std::cout << std::flush;
+    lastStatusLen = status.size();
+    while (std::chrono::steady_clock::now() < nextPacketTime) {
+    }
   }
 
   reset(0);

@@ -5,8 +5,13 @@
 #include <iostream>
 #include <thread>
 
+void debugOut(std::string a) {
+  std::cout << a << std::endl;
+}
+
 TritonController::TritonController(hid_device* handle) : SteamController(ControllerType::Triton) {
   this->hid_handle = handle;
+  debugOut("Created Triton class..");
 }
 
 void TritonController::close() {
@@ -23,7 +28,7 @@ int TritonController::playFrequency(int channel, double frequency, int velocity)
   byte packet[10] = {0};
   if (frequency == -1) {
     // This prevents the controller from rebooting when using rumble motors and drifting out of tune
-    packet[0] = 0x81;
+    packet[0] = LFO_TONE;
     packet[1] = channel;
   } else {
     int frequencyValue = static_cast<int>(frequency);
@@ -37,6 +42,24 @@ int TritonController::playFrequency(int channel, double frequency, int velocity)
     packet[6] = 0x64;
   }
   return sendRaw(packet, sizeof(packet));
+}
+
+int TritonController::sendPCMMode(MsgHapticPCMMode* packet) {
+  size_t size = sizeof(MsgHapticPCMMode);
+  
+  unsigned char buff[size + 1];
+  buff[0] = PCM_MODE;
+  memcpy(&buff[1], packet, size);
+  return sendRaw(buff, sizeof(buff));
+}
+
+int TritonController::sendPCMStereo(MsgHapticPCMStereo* packet) {
+  size_t size = sizeof(MsgHapticPCMStereo);
+  
+  unsigned char buff[size + 1] = {0};
+  buff[0] = PCM_STEREO;
+  memcpy(&buff[1], packet, size);
+  return sendRaw(buff, sizeof(buff));
 }
 
 int TritonController::sendRaw(byte packet[], size_t length) {
@@ -68,21 +91,25 @@ void TritonController::setupPCMStreaming() {
   std::size_t lastStatusLen = 0;
   for (byte ch : channels) {
     for (byte p : params) {
-      byte enable[4] = {0x86, 0x02, ch, p};
-      sendRaw(enable, 4);
-      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+      MsgHapticPCMMode modePacket;
+      modePacket.operation = 0x02;
+      modePacket.side = ch;
+      modePacket.param = p;
+
+      sendPCMMode(&modePacket);
+      std::this_thread::sleep_for(std::chrono::milliseconds(15));
       for (int rep = 0; rep < reps; rep++) {
-        byte buff[64] = {0};
-        buff[0] = 0x88;
-        buff[1] = 31;
+        MsgHapticPCMStereo packet;
+        packet.length = 31;
+
         for (int i = 0; i < 31; i++) {
           byte sample = ((i / 4) % 2) ? 0xFF : 0x00;
-          buff[2 + i] = sample;
-          buff[33 + i] = sample;
+          packet.left[i] = sample;
+          packet.right[i] = sample;
         }
-        sendRaw(buff, 64);
+        sendPCMStereo(&packet);
         // fun fact, windows likes to lie if it spent 1ms waiting when in reality it was spending >10ms
-        std::this_thread::sleep_for(std::chrono::microseconds(15000));
+        std::this_thread::sleep_for(std::chrono::milliseconds(15));
 
         completed++;
         double percent = (100.0 * completed) / (double)totalSteps;
