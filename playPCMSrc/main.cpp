@@ -28,7 +28,7 @@ constexpr int SAMPLE_RATE = 8000; // steam controller only supports up to signed
 const auto period = std::chrono::microseconds((SAMPLES_PER_PACKET * 1000000) / SAMPLE_RATE);
 
 const std::string helpString =
-    "Usage: play-pcm.exe [-s] <file path>\n"
+    "Usage: steam-haptics-singer.exe [-s] <file path>\n"
     "  -s  Skip running the setup phase if you've already run it once and haven't restarted your controller\n";
 
 void reset(int) {
