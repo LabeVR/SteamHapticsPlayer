@@ -5,7 +5,7 @@
 #include <iomanip>
 #include <iostream>
 #include <thread>
-
+#include <cstring>
 
 TritonController::TritonController(hid_device* handle) : SteamController(ControllerType::Triton) {
   this->hid_handle = handle;
@@ -42,7 +42,7 @@ int TritonController::playFrequency(int channel, double frequency, int velocity)
 }
 
 int TritonController::sendPCMMode(MsgHapticPCMMode* packet) {
-  size_t size = sizeof(MsgHapticPCMMode);
+  constexpr size_t size = sizeof(MsgHapticPCMMode);
   
   unsigned char buff[size + 1];
   buff[0] = PCM_MODE;
@@ -51,7 +51,7 @@ int TritonController::sendPCMMode(MsgHapticPCMMode* packet) {
 }
 
 int TritonController::sendPCMStereo(MsgHapticPCMStereo* packet) {
-  size_t size = sizeof(MsgHapticPCMStereo);
+  constexpr size_t size = sizeof(MsgHapticPCMStereo);
   
   unsigned char buff[size + 1] = {0};
   buff[0] = PCM_STEREO;
