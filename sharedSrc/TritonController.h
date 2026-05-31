@@ -2,7 +2,7 @@
 #include "SteamController.h"
 
 // have not tested 0x87 and 0x89. i could be completely wrong about them
-#pragma pack(1)
+#pragma pack(push, 1)
 
 typedef enum
 {
@@ -109,7 +109,7 @@ typedef struct
   uint8_t side;
   char data[61];
 } MsgHapticPCMMonoWithLength;
-
+#pragma pack(pop)
 
 
 class TritonController : public SteamController {
