@@ -120,6 +120,8 @@ int runPlayer(const Args& args) {
 
     while (std::chrono::steady_clock::now() < nextPacketTime) {}
   }
+  
+  std::cout << std::endl;
 
   reset(0);
   return 0;
