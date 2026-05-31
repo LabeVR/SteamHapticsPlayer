@@ -23,7 +23,6 @@ enum class Mode {
 class ProgressHelper {
 private:
   int totalSteps = 0;
-  bool progressBar;
   int steps = 1;
   Mode mode;
   std::string *startString;

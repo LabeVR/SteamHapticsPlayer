@@ -45,8 +45,8 @@ void ProgressHelper::timeStringProgressbar(std::ostringstream* ss, int progress,
 
   // i like to make general funcs but oh well this is taking too long
   // stereo (2) 8khz (8000)
-  std::string totalTime = formatTime(totalSteps / 2 / 8000.0);
-  std::string timeProgress = formatTime(progress / 2 / 8000.0);
+  std::string totalTime = formatTime(totalSteps / 2.0 / 8000.0);
+  std::string timeProgress = formatTime(progress / 2.0 / 8000.0);
 
   std::string filled = std::string(numToAdd, barChar);
   if (numToAdd > 0) filled[numToAdd - 1] = '>';

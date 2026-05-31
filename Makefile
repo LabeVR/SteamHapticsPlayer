@@ -8,7 +8,7 @@ HIDAPI_PKG ?= hidapi-hidraw
 UNICODE_FLAG ?=
 endif
 
-CXXFLAGS = -std=c++20 -Wall -Werror -g -Og `pkg-config --libs --cflags $(HIDAPI_PKG)`
+CXXFLAGS = -std=c++20 -Wall -Werror -g -O2 `pkg-config --libs --cflags $(HIDAPI_PKG)`
 
 SHARED_SRC = $(wildcard sharedSrc/*.cpp sharedSrc/*/*.cpp sharedSrc/*.c sharedSrc/*/*.c)
 RANGE_SRC = $(wildcard rangeSrc/*.cpp rangeSrc/*/*.cpp rangeSrc/*.c rangeSrc/*/*.c)
