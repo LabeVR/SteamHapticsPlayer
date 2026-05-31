@@ -8,6 +8,7 @@
 #include <iostream>
 #include <string>
 #include <thread>
+#include <Utils.h>
 
 TritonController* c = nullptr;
 ControllerFinder finder;
@@ -94,9 +95,10 @@ int runPlayer(const Args& args) {
   std::cout << "Playing audio...\n";
 
   MsgHapticPCMStereo packet;
-  int completed = 0;
-  std::size_t lastStatusLen = 0;
-  int totalSteps = aou.fileSize;
+  int totalSteps = aou.fileSize - NEED_BYTES;
+  std::string start = "Playing: ";
+  Utils::ProgressHelper progress(totalSteps, &start, NEED_BYTES, Utils::Mode::TIME);
+
   while (true) {
     byte tmp[NEED_BYTES];
     int r = aou.getBytes(tmp, NEED_BYTES);
@@ -104,7 +106,7 @@ int runPlayer(const Args& args) {
     if (r < NEED_BYTES) std::memset(tmp + r, 0, NEED_BYTES - r); // s8 silence = 0
 
     packet.length = 31;
-
+ 
     for (int i = 0; i < SAMPLES_PER_PACKET; i++) {
       byte left = tmp[i * 2];
       byte right = tmp[i * 2 + 1];
@@ -113,19 +115,10 @@ int runPlayer(const Args& args) {
     }
 
     c->sendPCMStereo(&packet);
-
+    progress.step();
     nextPacketTime += period;
-    completed += r;
-    double percent = (100.0 * completed) / (double)totalSteps;
-    std::ostringstream ss;
-    ss << "Playing: " << completed << "/" << totalSteps << " (" << std::fixed << std::setprecision(1) << percent << "%)";
-    std::string status = ss.str();
-    std::cout << '\r' << status;
-    if (lastStatusLen > status.size()) std::cout << std::string(lastStatusLen - status.size(), ' ');
-    std::cout << std::flush;
-    lastStatusLen = status.size();
-    while (std::chrono::steady_clock::now() < nextPacketTime) {
-    }
+
+    while (std::chrono::steady_clock::now() < nextPacketTime) {}
   }
 
   reset(0);

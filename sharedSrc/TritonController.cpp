@@ -1,17 +1,14 @@
 #include "TritonController.h"
 #include "Constants.h"
+#include "Utils.h"
 #include <cmath>
 #include <iomanip>
 #include <iostream>
 #include <thread>
 
-void debugOut(std::string a) {
-  std::cout << a << std::endl;
-}
 
 TritonController::TritonController(hid_device* handle) : SteamController(ControllerType::Triton) {
   this->hid_handle = handle;
-  debugOut("Created Triton class..");
 }
 
 void TritonController::close() {
@@ -87,8 +84,9 @@ void TritonController::setupPCMStreaming() {
   int reps = 10;
 
   int totalSteps = (sizeof(channels) / sizeof(channels[0])) * (sizeof(params) / sizeof(params[0])) * reps;
-  int completed = 0;
-  std::size_t lastStatusLen = 0;
+  std::string aou = "Setup: ";
+  Utils::ProgressHelper helper(totalSteps, &aou, 1, Utils::Mode::PROGRESSBAR);
+
   for (byte ch : channels) {
     for (byte p : params) {
       MsgHapticPCMMode modePacket;
@@ -108,18 +106,10 @@ void TritonController::setupPCMStreaming() {
           packet.right[i] = sample;
         }
         sendPCMStereo(&packet);
+        helper.step();
         // fun fact, windows likes to lie if it spent 1ms waiting when in reality it was spending >10ms
         std::this_thread::sleep_for(std::chrono::milliseconds(15));
 
-        completed++;
-        double percent = (100.0 * completed) / (double)totalSteps;
-        std::ostringstream ss;
-        ss << "Setup: " << completed << "/" << totalSteps << " (" << std::fixed << std::setprecision(1) << percent << "%)";
-        std::string status = ss.str();
-        std::cout << '\r' << status;
-        if (lastStatusLen > status.size()) std::cout << std::string(lastStatusLen - status.size(), ' ');
-        std::cout << std::flush;
-        lastStatusLen = status.size();
       }
     }
   }
