@@ -1,21 +1,40 @@
-all: range steam-haptics-player
+.PHONY: all release
+all: range steam-haptics-player measure
+release: all
+
+
+CXXFLAGS = -std=c++20 -Wall -Werror -static
+
+DEBUG_FLAGS = -g -Og
+RELEASE_FLAGS = -O2
+
+ifeq ($(filter release,$(MAKECMDGOALS)), release)
+  CXXFLAGS += $(RELEASE_FLAGS)
+else
+  CXXFLAGS += $(DEBUG_FLAGS)
+endif
 
 ifeq ($(OS),Windows_NT)
 HIDAPI_PKG ?= hidapi
 UNICODE_FLAG ?= -municode
 else
-HIDAPI_PKG ?= hidapi-hidraw 
+HIDAPI_PKG ?= hidapi-hidraw
 UNICODE_FLAG ?=
 endif
 
-CXXFLAGS = -std=c++20 -Wall -Werror -g -O2 `pkg-config --libs --cflags $(HIDAPI_PKG)`
+CXXFLAGS += `pkg-config --libs --cflags $(HIDAPI_PKG)`
+
 
 SHARED_SRC = $(wildcard sharedSrc/*.cpp sharedSrc/*/*.cpp sharedSrc/*.c sharedSrc/*/*.c)
 RANGE_SRC = $(wildcard rangeSrc/*.cpp rangeSrc/*/*.cpp rangeSrc/*.c rangeSrc/*/*.c)
 PCM_SRC = $(wildcard playPCMSrc/*.cpp playPCMSrc/*/*.cpp playPCMSrc/*.c playPCMSrc/*/*.c)
+MEASURE_SRC = $(wildcard measureSrc/*.cpp measureSrc/*/*.cpp measureSrc/*.c measureSrc/*/*.c)
 
 range: $(RANGE_SRC) $(SHARED_SRC)
 	g++ -IsharedSrc -o range $^ $(CXXFLAGS)
 
 steam-haptics-player: ${PCM_SRC} ${SHARED_SRC}
 	g++ -IsharedSrc $(UNICODE_FLAG) -o steam-haptics-player $^ $(CXXFLAGS)
+
+measure: ${MEASURE_SRC} ${SHARED_SRC}
+	g++ -IsharedSrc -o measure $^ $(CXXFLAGS)
