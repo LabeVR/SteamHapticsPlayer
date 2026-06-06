@@ -10,7 +10,7 @@ This project allows stereo audio to be streamed from a file to the haptics of a 
 **Requirements:** FFmpeg on PATH
 
 #### **Note For puck audio:**
-- When streaming audio via the Puck, you may encounter popping noises or other audio quality issues due to packet loss. USB audio should be much cleaner. Therefore, while playing audio wirelessly is an option, I would recommend using USB.
+- When streaming audio via the Puck, you may encounter popping noises or other audio quality issues due to packet loss. Wired should normally be much cleaner.
 
 #### On Windows
 1. Open Powershell in the file directory where you have extracted the executable
