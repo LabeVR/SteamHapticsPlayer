@@ -78,8 +78,10 @@ make
 ## Changelog
 [v1.3.0]
 Added progress bar, reworked how files are loaded
+
 [v1.2.0]
 Fixed controller detection with puck (Thanks @CrazyCritic89)
+
 [v1.1.0]
 Linux support
 Checks for ffmpeg
