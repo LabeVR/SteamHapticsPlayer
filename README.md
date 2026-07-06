@@ -9,7 +9,7 @@ This project allows stereo audio to be streamed from a file to the haptics of a 
 
 **Requirements:** FFmpeg on PATH
 
-**System audio mode:** The `--system-audio` flag captures the PC's default output via ffmpeg loopback. It does not create a new output device; it listens to whatever is already playing on your default speakers or headphones.
+**System audio mode:** this fork enables livestreaming system audio, although it only works for windows
 
 #### **Note For puck audio:**
 - When streaming audio via the Puck, you may encounter popping noises or other audio quality issues due to packet loss. Wired should normally be much cleaner.
