@@ -5,17 +5,18 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "C:/msys64/ucrt64/include/**",
-                "${workspaceFolder}/sharedSrc"
+                "${workspaceFolder}/sharedSrc",
+                "C:/msys64/mingw64/include/**"
             ],
             "defines": [
                 "_DEBUG",
                 "UNICODE",
                 "_UNICODE"
             ],
-            "compilerPath": "C:/msys64/ucrt64/bin/g++.exe",
+            "compilerPath": "C:/msys64/mingw32/bin/g++.exe",
             "cStandard": "c23",
             "cppStandard": "c++26",
-            "intelliSenseMode": "gcc-x64"
+            "intelliSenseMode": "windows-gcc-x86"
         }
     ],
     "version": 4

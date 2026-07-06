@@ -17,9 +17,11 @@ endif
 ifeq ($(OS),Windows_NT)
 HIDAPI_PKG ?= hidapi
 UNICODE_FLAG ?= -municode
+WIN_LIBS ?= -lole32 -luuid -lavrt
 else
 HIDAPI_PKG ?= hidapi-hidraw
 UNICODE_FLAG ?=
+WIN_LIBS ?=
 endif
 
 CXXFLAGS += `pkg-config --libs --cflags $(HIDAPI_PKG)`
@@ -34,7 +36,7 @@ range: $(RANGE_SRC) $(SHARED_SRC)
 	g++ -IsharedSrc -o range $^ $(CXXFLAGS)
 
 steam-haptics-player: ${PCM_SRC} ${SHARED_SRC}
-	g++ -IsharedSrc $(UNICODE_FLAG) -o steam-haptics-player $^ $(CXXFLAGS)
+	g++ -IsharedSrc $(UNICODE_FLAG) -o steam-haptics-player $^ $(CXXFLAGS) $(WIN_LIBS)
 
 measure: ${MEASURE_SRC} ${SHARED_SRC}
 	g++ -IsharedSrc -o measure $^ $(CXXFLAGS)

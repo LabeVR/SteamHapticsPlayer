@@ -10,6 +10,14 @@
 #include <thread>
 #include <Utils.h>
 
+#ifdef _WIN32
+#include <conio.h>
+#else
+#include <sys/select.h>
+#include <termios.h>
+#include <unistd.h>
+#endif
+
 TritonController* c = nullptr;
 ControllerFinder finder;
 // if anyone is wondering why this is called aou, consult this video https://www.youtube.com/watch?v=kiFCFlAUy_8
@@ -17,6 +25,7 @@ PCM aou;
 
 struct Args {
   bool setup = true;
+  bool systemAudio = false;
   path_t filePath;
   std::string help;
 };
@@ -28,8 +37,54 @@ constexpr int SAMPLE_RATE = 8000; // steam controller only supports up to signed
 const auto period = std::chrono::microseconds((SAMPLES_PER_PACKET * 1000000) / SAMPLE_RATE);
 
 const std::string helpString =
-    "Usage: steam-haptics-singer.exe [-s] <file path>\n"
+  "Usage: steam-haptics-player.exe [-s] [--system-audio] [file path]\n"
+  "  --system-audio  Capture the PC's default output through ffmpeg loopback instead of playing a file\n"
     "  -s  Skip running the setup phase if you've already run it once and haven't restarted your controller\n";
+
+#ifndef _WIN32
+class StdinRawModeGuard {
+public:
+  StdinRawModeGuard() {
+    if (tcgetattr(STDIN_FILENO, &originalAttributes) != 0) return;
+    newAttributes = originalAttributes;
+    newAttributes.c_lflag &= static_cast<unsigned long>(~(ICANON | ECHO));
+    newAttributes.c_cc[VMIN] = 0;
+    newAttributes.c_cc[VTIME] = 0;
+    if (tcsetattr(STDIN_FILENO, TCSANOW, &newAttributes) == 0) {
+      active = true;
+    }
+  }
+
+  ~StdinRawModeGuard() {
+    if (active) tcsetattr(STDIN_FILENO, TCSANOW, &originalAttributes);
+  }
+
+private:
+  termios originalAttributes{};
+  termios newAttributes{};
+  bool active = false;
+};
+
+bool quitKeyPressed() {
+  fd_set readFds;
+  FD_ZERO(&readFds);
+  FD_SET(STDIN_FILENO, &readFds);
+
+  timeval timeout{};
+  int ready = select(STDIN_FILENO + 1, &readFds, nullptr, nullptr, &timeout);
+  if (ready <= 0 || !FD_ISSET(STDIN_FILENO, &readFds)) return false;
+
+  char ch = 0;
+  ssize_t bytesRead = read(STDIN_FILENO, &ch, 1);
+  return bytesRead == 1 && (ch == 'q' || ch == 'Q');
+}
+#else
+bool quitKeyPressed() {
+  if (!_kbhit()) return false;
+  int ch = _getch();
+  return ch == 'q' || ch == 'Q';
+}
+#endif
 
 void reset(int) {
   // aou.stop();
@@ -45,6 +100,8 @@ Args parseArgs(int argc, ArgGetter argAt) {
 
     if (argStr == "-s") {
       args.setup = false;
+    } else if (argStr == "--system-audio") {
+      args.systemAudio = true;
     } else if (!argStr.empty() && argStr[0] == '-') {
       args.help = helpString;
       return args;
@@ -53,7 +110,7 @@ Args parseArgs(int argc, ArgGetter argAt) {
     }
   }
 
-  if (args.filePath.empty()) args.help = helpString;
+  if (args.filePath.empty() && !args.systemAudio) args.help = helpString;
   return args;
 }
 
@@ -68,15 +125,21 @@ int runPlayer(const Args& args) {
   if (cont->type == ControllerType::Triton) c = static_cast<TritonController*>(cont);
   if (c == nullptr) return 1;
 
-  int loadResult = aou.load(args.filePath);
+  int loadResult = aou.load(args.filePath, args.systemAudio);
   if (loadResult < 0) {
     if (loadResult == -2) {
       std::cout << "ffmpeg was not found on PATH\n";
+    } else if (loadResult == -3) {
+      std::cout << "system audio capture is only supported on Windows in this build\n";
     } else {
 #ifdef _WIN32
-      std::wcout << L"ffmpeg could not load " << args.filePath << L"\n";
+      if (args.systemAudio) {
+        std::cout << "ffmpeg could not open the system audio loopback source\n";
+      } else {
+        std::wcout << L"ffmpeg could not load " << args.filePath << L"\n";
+      }
 #else
-      std::cout << "ffmpeg could not load " << args.filePath << "\n";
+      std::cout << "ffmpeg could not load input\n";
 #endif
     }
     return 1;
@@ -86,17 +149,27 @@ int runPlayer(const Args& args) {
 
   if (args.setup) c->setupPCMStreaming();
 
-  byte primeBuf[NEED_BYTES];
-  int pr = aou.getBytes(primeBuf, NEED_BYTES);
-  (void)pr;
+#ifndef _WIN32
+  StdinRawModeGuard stdinRawModeGuard;
+#endif
+
+  if (!args.systemAudio) {
+    byte primeBuf[NEED_BYTES];
+    int pr = aou.getBytes(primeBuf, NEED_BYTES);
+    (void)pr;
+  }
 
   auto nextPacketTime = std::chrono::steady_clock::now();
 
-  std::cout << "Playing audio...\n";
+  if (args.systemAudio) {
+    std::cout << "Streaming system audio...\n";
+  } else {
+    std::cout << "Playing audio...\n";
+  }
 
   MsgHapticPCMStereo packet;
-  int totalSteps = aou.fileSize - NEED_BYTES;
-  std::string start = "Playing: ";
+  int totalSteps = args.systemAudio ? 0 : static_cast<int>(aou.fileSize > NEED_BYTES ? aou.fileSize - NEED_BYTES : 0);
+  std::string start = args.systemAudio ? "Streaming: " : "Playing: ";
   Utils::ProgressHelper progress(totalSteps, &start, NEED_BYTES, Utils::Mode::TIME);
 
   while (true) {
@@ -115,8 +188,13 @@ int runPlayer(const Args& args) {
     }
 
     c->sendPCMStereo(&packet);
-    progress.step();
+  if (!args.systemAudio) progress.step();
     nextPacketTime += period;
+
+    if (quitKeyPressed()) {
+      std::cout << "\nQuit requested.\n";
+      break;
+    }
 
     while (std::chrono::steady_clock::now() < nextPacketTime) {}
   }

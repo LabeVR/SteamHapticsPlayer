@@ -7,8 +7,7 @@
       "request": "launch",
       "program": "${workspaceFolder}\\steam-haptics-player.exe",
       "args": [
-        "-s",
-        "M:\\Plex\\Music\\Cubism\\Cubibibibism.mp3"
+        "-s"
       ],
       "cwd": "${workspaceFolder}",
       "stopAtEntry": false,

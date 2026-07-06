@@ -9,6 +9,8 @@ This project allows stereo audio to be streamed from a file to the haptics of a 
 
 **Requirements:** FFmpeg on PATH
 
+**System audio mode:** The `--system-audio` flag captures the PC's default output via ffmpeg loopback. It does not create a new output device; it listens to whatever is already playing on your default speakers or headphones.
+
 #### **Note For puck audio:**
 - When streaming audio via the Puck, you may encounter popping noises or other audio quality issues due to packet loss. Wired should normally be much cleaner.
 
@@ -35,8 +37,9 @@ OR
 
 
 ### Usage from command prompt:
-	Usage: play-pcm.exe [-s] <file path>
+	Usage: steam-haptics-player.exe [-s] [--system-audio] [file path]
           -s  Skip running the setup phase (if you have already run it once and havent restarted your controller)
+          --system-audio  Capture the PC's default output with ffmpeg loopback instead of reading a file
 
 ### Tips
   - Try pressing the controller down into a solid object (although not too hard), it will make the sound **much** louder
